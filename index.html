@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carte interactive RDC - Staff & Projets</title>
-    <!-- Leaflet CSS & JS -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carte RDC - Interventions</title>
+    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Police Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
     <style>
         * {
             margin: 0;
@@ -14,173 +16,190 @@
             box-sizing: border-box;
         }
         body {
-            background: #f0f2f5;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            font-family: 'Roboto', sans-serif;
         }
         .map-container {
             width: 100%;
             max-width: 1300px;
             height: 90vh;
-            max-height: 850px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-            overflow: hidden;
+            max-height: 820px;
             background: #ffffff;
+            border: 1px solid #dce1e8;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
             position: relative;
         }
         #map {
             width: 100%;
             height: 100%;
-            background: #e5e9f0;
+            background: #eef0f2;
         }
-        /* personnalisation des popups */
-        .custom-popup .leaflet-popup-content-wrapper {
-            background: #1e2a3a;
-            color: #f0f4fc;
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-            padding: 4px 2px;
-            max-width: 360px;
+
+        /* --- Popup style clair, sans arrondi, sans icônes --- */
+        .popup-custom .leaflet-popup-content-wrapper {
+            background: #ffffff;
+            color: #1e2a3a;
+            border-radius: 0 !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+            padding: 0;
+            border-left: 4px solid #6ec1e4;
+            font-family: 'Roboto', sans-serif;
         }
-        .custom-popup .leaflet-popup-content {
-            font-size: 14px;
+        .popup-custom .leaflet-popup-content {
+            font-size: 13px;
             line-height: 1.5;
-            margin: 12px 14px;
-            max-height: 400px;
+            margin: 14px 16px;
+            max-height: 420px;
             overflow-y: auto;
+            padding-right: 4px;
         }
-        .custom-popup .leaflet-popup-tip {
-            background: #1e2a3a;
+        .popup-custom .leaflet-popup-tip {
+            background: #ffffff;
+            border-radius: 0 !important;
         }
-        .popup-title {
+        .popup-custom .leaflet-popup-close-button {
+            color: #5a6b7c !important;
+            font-size: 20px !important;
+            font-weight: 300;
+            top: 6px;
+            right: 10px;
+        }
+        .popup-custom .leaflet-popup-close-button:hover {
+            color: #1e2a3a !important;
+        }
+
+        /* --- contenu popup --- */
+        .popup-province {
             font-size: 20px;
             font-weight: 700;
-            border-bottom: 2px solid #4f8bc9;
+            color: #C084FC;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid #e6eaef;
             padding-bottom: 6px;
             margin-bottom: 12px;
-            color: #ffd966;
-            letter-spacing: 0.5px;
-        }
-        .popup-section {
-            margin-top: 12px;
-        }
-        .popup-section strong {
-            color: #8fcbff;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 4px;
-        }
-        .popup-section .label {
-            color: #b0c7e7;
-            font-weight: 400;
         }
         .popup-staff {
             display: inline-block;
-            background: #2c3e5a;
-            padding: 2px 12px;
-            border-radius: 30px;
-            font-weight: 600;
-            color: #ffb347;
-            margin-top: 4px;
+            background: #f0f4fb;
+            color: #1e2a3a;
+            font-weight: 500;
+            padding: 2px 14px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            border: 1px solid #dce1e8;
         }
-        .popup-partner {
-            background: #26344a;
-            padding: 3px 10px;
-            border-radius: 20px;
-            display: inline-block;
-            margin: 2px 4px 2px 0;
-            font-size: 12px;
-            border: 1px solid #4f6a8f;
+        .popup-label {
+            font-weight: 700;
+            color: #2c3e5a;
+            font-size: 14px;
+            margin-top: 14px;
+            margin-bottom: 4px;
+            display: block;
         }
         .popup-projet {
-            background: #1f2b3b;
-            padding: 6px 10px;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            border-left: 3px solid #ffb347;
-            font-size: 13px;
+            padding: 5px 0 5px 10px;
+            border-left: 2px solid #6ec1e4;
+            margin-bottom: 5px;
+            font-size: 12.5px;
+            color: #1e2a3a;
+            background: #fafbfc;
+            padding-right: 6px;
         }
+        .popup-partner {
+            display: inline-block;
+            background: #f0f4fb;
+            padding: 2px 10px;
+            margin: 2px 4px 2px 0;
+            font-size: 12px;
+            color: #1e2a3a;
+            border: 1px solid #dce1e8;
+        }
+        .popup-section {
+            margin-top: 8px;
+        }
+
+        /* --- Légende --- */
         .legend {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(20, 30, 45, 0.85);
-            backdrop-filter: blur(4px);
-            padding: 14px 18px;
-            border-radius: 14px;
-            color: #eef4fc;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            border: 1px solid #3e5775;
+            bottom: 28px;
+            right: 28px;
+            background: #ffffff;
+            padding: 14px 20px;
+            border: 1px solid #dce1e8;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            font-family: 'Roboto', sans-serif;
+            font-size: 13px;
+            color: #1e2a3a;
             z-index: 1000;
-            font-size: 14px;
-            line-height: 1.7;
-            min-width: 140px;
+            line-height: 1.6;
+            min-width: 130px;
         }
         .legend .dot {
             display: inline-block;
-            width: 14px;
-            height: 14px;
             border-radius: 50%;
             margin-right: 8px;
-            background: #ffb347;
-            border: 1px solid #fff2d0;
+            background: #6ec1e4;
+            border: 1px solid #b0c7e0;
         }
-        .legend .dot-small {
-            width: 10px;
-            height: 10px;
-        }
-        .legend .dot-large {
-            width: 20px;
-            height: 20px;
-        }
+        .legend .dot-small { width: 12px; height: 12px; }
+        .legend .dot-med   { width: 18px; height: 18px; }
+        .legend .dot-large { width: 26px; height: 26px; }
+        .legend .dot-xl    { width: 34px; height: 34px; }
         .legend-item {
             display: flex;
             align-items: center;
-            margin: 4px 0;
+            margin: 2px 0;
         }
+        .legend-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #2c3e5a;
+            border-bottom: 1px solid #e6eaef;
+            padding-bottom: 4px;
+        }
+
         @media (max-width: 640px) {
-            .map-container {
-                height: 95vh;
-                max-height: 700px;
-                border-radius: 12px;
-            }
-            .legend {
-                bottom: 16px;
-                right: 16px;
-                padding: 10px 14px;
-                font-size: 12px;
-                min-width: 110px;
-            }
+            .map-container { height: 95vh; max-height: 700px; }
+            .legend { bottom: 16px; right: 16px; padding: 10px 14px; font-size: 12px; min-width: 100px; }
+        }
+
+        /* Scrollbar personnalisée (discrète) */
+        .popup-custom .leaflet-popup-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .popup-custom .leaflet-popup-content::-webkit-scrollbar-track {
+            background: #f0f2f5;
+        }
+        .popup-custom .leaflet-popup-content::-webkit-scrollbar-thumb {
+            background: #c4cdd8;
         }
     </style>
 </head>
 <body>
 <div class="map-container">
     <div id="map"></div>
-    <!-- Légende personnalisée -->
+    <!-- Légende -->
     <div class="legend">
-        <div style="font-weight:600; margin-bottom:6px; color:#ffd966;">👥 Staff</div>
-        <div class="legend-item"><span class="dot dot-small" style="background:#f9a95c;"></span> 10–25</div>
-        <div class="legend-item"><span class="dot" style="background:#f58b3c;"></span> 26–50</div>
-        <div class="legend-item"><span class="dot dot-large" style="background:#e06b1f;"></span> 51–100</div>
-        <div class="legend-item"><span class="dot" style="width:26px; height:26px; background:#b84c0e;"></span> 100+</div>
+        <div class="legend-title">Effectifs staff</div>
+        <div class="legend-item"><span class="dot dot-small"></span> 10 – 19</div>
+        <div class="legend-item"><span class="dot dot-med"></span> 20 – 39</div>
+        <div class="legend-item"><span class="dot dot-large"></span> 40 – 79</div>
+        <div class="legend-item"><span class="dot dot-xl"></span> 80 +</div>
     </div>
 </div>
 
 <script>
     (function() {
-        // ------------------ DONNÉES PROVINCES ------------------
-        const provincesData = [
+        // ---- Données des provinces ----
+        const provinces = [
             {
-                name: "Nord-Kivu",
-                lat: -0.571,
-                lng: 28.674,
-                staff: 131,
+                name: "Nord-Kivu", lat: -0.571, lng: 28.674, staff: 131,
                 projets: [
                     "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations affectées par les crises dans les contextes complexes de l’Est de la RDC.",
                     "2. Analyse du contexte des conflits et réalisation d’une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix ‘’Kizazi Cha Amani : Génération paix pour les grands lacs’’.",
@@ -202,10 +221,7 @@
                 partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; Rainforest Foundation Norway « RFN » ; InterAction; ACTED; The Research People; Cordaid; Tearfund; Lutheran World Federation « LWF »"
             },
             {
-                name: "Sud-Kivu",
-                lat: -2.822,
-                lng: 28.189,
-                staff: 81,
+                name: "Sud-Kivu", lat: -2.822, lng: 28.189, staff: 81,
                 projets: [
                     "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations affectées par les crises dans les contextes complexes de l’Est de la RDC.",
                     "2. Analyse du contexte des conflits et réalisation d’une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix ‘’Kizazi Cha Amani : Génération paix pour les grands lacs’’.",
@@ -231,10 +247,7 @@
                 partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; InterAction; The Research People; Cordaid; Interpeace ; Croix-Rouge Française ; CARE International; Tearfund; Caritas International Belgique"
             },
             {
-                name: "Tanganyika",
-                lat: -6.067,
-                lng: 28.975,
-                staff: 42,
+                name: "Tanganyika", lat: -6.067, lng: 28.975, staff: 42,
                 projets: [
                     "Évaluation Finale : Projet de Réponse d’urgence aux besoins de santé des populations affectées par les conflits",
                     "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet",
@@ -243,10 +256,7 @@
                 partenaires: "Médecins du Monde France; Tearfund"
             },
             {
-                name: "Haut-Katanga",
-                lat: -11.442,
-                lng: 27.694,
-                staff: 25,
+                name: "Haut-Katanga", lat: -11.442, lng: 27.694, staff: 25,
                 projets: [
                     "Évaluation indépendante du projet Laboratoire d’Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l’espace Katanga)",
                     "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet"
@@ -254,10 +264,7 @@
                 partenaires: "Parkinson's Progression Markers Initiative « PPMI »"
             },
             {
-                name: "Ituri",
-                lat: 1.684,
-                lng: 29.586,
-                staff: 36,
+                name: "Ituri", lat: 1.684, lng: 29.586, staff: 36,
                 projets: [
                     "1. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix mis en œuvre par le programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
                     "2. Enquête annuelle du programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
@@ -270,10 +277,7 @@
                 partenaires: "Ground Truth Solutions “GTS” ; InterAction; CARE International; Trocaire ; Tearfund"
             },
             {
-                name: "Maniema",
-                lat: -4.183,
-                lng: 26.167,
-                staff: 14,
+                name: "Maniema", lat: -4.183, lng: 26.167, staff: 14,
                 projets: [
                     "1.Evaluation mi-parcours Programme d’Agriculture durable et meilleure protection des forêts tropicales en RD Congo « REDD+ NICFI »",
                     "2. Evaluation finale du Projet: Emergency multi-sectoral response in food assistance, wash, shelter and CCCM to people affected by displacements, (EKU-BHA)",
@@ -283,30 +287,17 @@
                 partenaires: "NORWEGIAN CHURCH AID « NCA » ; ACTED; Tearfund"
             },
             {
-                name: "Kasai",
-                lat: -5.947,
-                lng: 22.413,
-                staff: 14,
-                projets: [
-                    "Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »"
-                ],
+                name: "Kasai", lat: -5.947, lng: 22.413, staff: 14,
+                projets: [ "Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »" ],
                 partenaires: "Caritas International Belgique"
             },
             {
-                name: "Kasai-central",
-                lat: -5.898,
-                lng: 22.430,
-                staff: 19,
-                projets: [
-                    "Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »"
-                ],
+                name: "Kasai-central", lat: -5.898, lng: 22.430, staff: 19,
+                projets: [ "Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »" ],
                 partenaires: "Caritas International Belgique"
             },
             {
-                name: "Kinshasa",
-                lat: -4.322,
-                lng: 15.317,
-                staff: 30,
+                name: "Kinshasa", lat: -4.322, lng: 15.317, staff: 30,
                 projets: [
                     "Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
                     "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet"
@@ -314,120 +305,108 @@
                 partenaires: "InterAction"
             },
             {
-                name: "Equateur",
-                lat: -0.805,
-                lng: 19.412,
-                staff: 30,
-                projets: [
-                    "Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en République démocratique du Congo"
-                ],
+                name: "Equateur", lat: -0.805, lng: 19.412, staff: 30,
+                projets: [ "Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en République démocratique du Congo" ],
                 partenaires: "Parkinson's Progression Markers Initiative « PPMI »; Rainforest Foundation Norway « RFN »"
             },
             {
-                name: "Lualaba",
-                lat: -9.667,
-                lng: 25.500,
-                staff: 10,
-                projets: [
-                    "Évaluation indépendante du projet Laboratoire d’Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l’espace Katanga)"
-                ],
+                name: "Lualaba", lat: -9.667, lng: 25.500, staff: 10,
+                projets: [ "Évaluation indépendante du projet Laboratoire d’Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l’espace Katanga)" ],
                 partenaires: "Parkinson's Progression Markers Initiative « PPMI »"
             }
         ];
 
-        // ------------------ INIT MAP ------------------
+        // ---- Initialisation de la carte ----
         const map = L.map('map', {
-            center: [-2.5, 23.5],
+            center: [-2.8, 23.8],
             zoom: 6,
-            zoomControl: true,
-            fadeAnimation: true,
-            attributionControl: true
+            zoomControl: true
         });
 
-        // fond de carte (OpenStreetMap)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 18
+        // ---- Fonds de carte : style "grisé" ----
+        // Utilisation d'un fond OpenStreetMap en niveaux de gris via un filtre CSS appliqué sur les tuiles
+        // On utilise un layer "gris" personnalisé avec des tuiles en niveau de gris.
+        // L'astuce : on charge un tileLayer standard et on applique un filtre CSS via le style de la classe.
+        // Mais pour un rendu plus propre on va utiliser un fond "CartoDB" en niveaux de gris (positron) 
+        // qui donne un très bon rendu gris clair pour les pays voisins.
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB',
+            subdomains: 'abcd',
+            maxZoom: 19,
+            // on désature via un filtre CSS pour avoir un gris plus uniforme
+            // mais CartoDB light est déjà en tons pastel, on peut aussi appliquer un filtre global.
         }).addTo(map);
 
-        // fonction pour déterminer le rayon en fonction du staff (logarithme pour meilleur rendu)
+        // On ajoute un filtre CSS sur les tuiles pour les rendre presque en niveaux de gris
+        // (on le fait via une classe ajoutée dynamiquement sur le conteneur)
+        document.getElementById('map').classList.add('grayscale-map');
+
+        // Style CSS pour le filtre grayscale
+        const style = document.createElement('style');
+        style.textContent = `
+            .grayscale-map .leaflet-tile {
+                filter: grayscale(95%) brightness(1.05) contrast(0.95);
+                -webkit-filter: grayscale(95%) brightness(1.05) contrast(0.95);
+            }
+            /* pour que les pays voisins soient bien gris clair */
+            .grayscale-map .leaflet-tile-pane {
+                opacity: 0.95;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ---- Fonction pour le rayon des cercles ----
         function getRadius(staff) {
-            if (staff >= 100) return 45;
-            if (staff >= 50) return 34;
-            if (staff >= 25) return 24;
-            if (staff >= 10) return 18;
+            if (staff >= 80) return 42;
+            if (staff >= 40) return 30;
+            if (staff >= 20) return 22;
+            if (staff >= 10) return 16;
             return 14;
         }
 
-        // fonction pour la couleur des cercles (dégradé)
-        function getColor(staff) {
-            if (staff >= 100) return '#b84c0e';
-            if (staff >= 50) return '#e06b1f';
-            if (staff >= 25) return '#f58b3c';
-            if (staff >= 10) return '#f9a95c';
-            return '#fccb8c';
-        }
-
-        // ------------------ AJOUT DES MARQUEURS (cercles) ------------------
-        provincesData.forEach(prov => {
+        // ---- Ajout des cercles ----
+        provinces.forEach(prov => {
             const radius = getRadius(prov.staff);
-            const color = getColor(prov.staff);
-            const fillOpacity = 0.75;
-
-            // Cercle
             const circle = L.circle([prov.lat, prov.lng], {
-                radius: radius * 1600,   // ajustement pour échelle
-                color: '#ffffff',
-                weight: 2,
-                fillColor: color,
-                fillOpacity: fillOpacity,
+                radius: radius * 1400,
+                color: '#6ec1e4',
+                weight: 2.5,
+                fillColor: '#6ec1e4',
+                fillOpacity: 0.65,
                 opacity: 0.9,
                 className: 'province-circle'
             }).addTo(map);
 
-            // Popup avec formatage
+            // Popup
             const popupContent = `
-                <div class="popup-title">📍 ${prov.name}</div>
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span style="background:#2a3f5a; padding:4px 16px; border-radius:40px; font-weight:700; color:#ffb347;">👥 ${prov.staff} staff</span>
-                </div>
-                <div class="popup-section">
-                    <strong>📋 Projets</strong>
-                    ${prov.projets.map(p => `<div class="popup-projet">${p}</div>`).join('')}
-                </div>
-                <div class="popup-section" style="margin-top:14px;">
-                    <strong>🤝 Partenaires</strong>
-                    <div style="margin-top:6px;">
-                        ${prov.partenaires.split(';').map(p => `<span class="popup-partner">${p.trim()}</span>`).join(' ')}
-                    </div>
+                <div class="popup-province">${prov.name}</div>
+                <div class="popup-staff">Staff : ${prov.staff}</div>
+                <span class="popup-label">Projets</span>
+                ${prov.projets.map(p => `<div class="popup-projet">${p}</div>`).join('')}
+                <span class="popup-label" style="margin-top:16px;">Partenaires</span>
+                <div style="margin-top:4px;">
+                    ${prov.partenaires.split(';').map(p => `<span class="popup-partner">${p.trim()}</span>`).join(' ')}
                 </div>
             `;
 
             circle.bindPopup(popupContent, {
-                className: 'custom-popup',
-                maxWidth: 360,
+                className: 'popup-custom',
+                maxWidth: 380,
                 closeButton: true
             });
 
-            // petit effet : survol
+            // Effet survol
             circle.on('mouseover', function() {
-                this.setStyle({ weight: 4, color: '#ffd966' });
+                this.setStyle({ weight: 4, color: '#C084FC', fillOpacity: 0.8 });
             });
             circle.on('mouseout', function() {
-                this.setStyle({ weight: 2, color: '#ffffff' });
+                this.setStyle({ weight: 2.5, color: '#6ec1e4', fillOpacity: 0.65 });
             });
         });
 
-        // Ajustement des coordonnées pour bien centrer
-        setTimeout(() => {
-            map.invalidateSize();
-        }, 200);
-
-        // Ajout d'un contrôle de zoom personnalisé (optionnel)
-        L.control.zoom({ position: 'topright' }).addTo(map);
+        // Ajustement
+        setTimeout(() => map.invalidateSize(), 300);
     })();
 </script>
-
-<!-- note : si vous utilisez un iframe, le fond s'adapte automatiquement -->
 </body>
 </html>
