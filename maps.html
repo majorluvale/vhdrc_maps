@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte interactive RDC - Staff & Projets</title>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .map-container {
+            width: 100%;
+            max-width: 1300px;
+            height: 90vh;
+            max-height: 850px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            overflow: hidden;
+            background: #ffffff;
+            position: relative;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            background: #e5e9f0;
+        }
+        /* personnalisation des popups */
+        .custom-popup .leaflet-popup-content-wrapper {
+            background: #1e2a3a;
+            color: #f0f4fc;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            padding: 4px 2px;
+            max-width: 360px;
+        }
+        .custom-popup .leaflet-popup-content {
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 12px 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .custom-popup .leaflet-popup-tip {
+            background: #1e2a3a;
+        }
+        .popup-title {
+            font-size: 20px;
+            font-weight: 700;
+            border-bottom: 2px solid #4f8bc9;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            color: #ffd966;
+            letter-spacing: 0.5px;
+        }
+        .popup-section {
+            margin-top: 12px;
+        }
+        .popup-section strong {
+            color: #8fcbff;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .popup-section .label {
+            color: #b0c7e7;
+            font-weight: 400;
+        }
+        .popup-staff {
+            display: inline-block;
+            background: #2c3e5a;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #ffb347;
+            margin-top: 4px;
+        }
+        .popup-partner {
+            background: #26344a;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 2px 4px 2px 0;
+            font-size: 12px;
+            border: 1px solid #4f6a8f;
+        }
+        .popup-projet {
+            background: #1f2b3b;
+            padding: 6px 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border-left: 3px solid #ffb347;
+            font-size: 13px;
+        }
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(20, 30, 45, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 14px 18px;
+            border-radius: 14px;
+            color: #eef4fc;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #3e5775;
+            z-index: 1000;
+            font-size: 14px;
+            line-height: 1.7;
+            min-width: 140px;
+        }
+        .legend .dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background: #ffb347;
+            border: 1px solid #fff2d0;
+        }
+        .legend .dot-small {
+            width: 10px;
+            height: 10px;
+        }
+        .legend .dot-large {
+            width: 20px;
+            height: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 4px 0;
+        }
+        @media (max-width: 640px) {
+            .map-container {
+                height: 95vh;
+                max-height: 700px;
+                border-radius: 12px;
+            }
+            .legend {
+                bottom: 16px;
+                right: 16px;
+                padding: 10px 14px;
+                font-size: 12px;
+                min-width: 110px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="map-container">
+    <div id="map"></div>
+    <!-- Légende personnalisée -->
+    <div class="legend">
+        <div style="font-weight:600; margin-bottom:6px; color:#ffd966;">👥 Staff</div>
+        <div class="legend-item"><span class="dot dot-small" style="background:#f9a95c;"></span> 10–25</div>
+        <div class="legend-item"><span class="dot" style="background:#f58b3c;"></span> 26–50</div>
+        <div class="legend-item"><span class="dot dot-large" style="background:#e06b1f;"></span> 51–100</div>
+        <div class="legend-item"><span class="dot" style="width:26px; height:26px; background:#b84c0e;"></span> 100+</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ------------------ DONNÉES PROVINCES ------------------
+        const provincesData = [
+            {
+                name: "Nord-Kivu",
+                lat: -0.571,
+                lng: 28.674,
+                staff: 131,
+                projets: [
+                    "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations affectées par les crises dans les contextes complexes de l’Est de la RDC.",
+                    "2. Analyse du contexte des conflits et réalisation d’une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix ‘’Kizazi Cha Amani : Génération paix pour les grands lacs’’.",
+                    "3. Renforcer la réponse d'urgence dans l'est de la RDC grâce à l'engagement communautaire.",
+                    "4. Evaluation finale du projet WASH dans les territoires de Nyiragongo et Goma.",
+                    "5. USAID's Sustainable Water and Sanitation Systems. « SWASSA ».",
+                    "5. Programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
+                    "6. Outcome Harvesting (Etude Moisson des effets) l’appréciation des relations entre les autorités judiciaires, frontalières et les populations locales, projet : \" Accès à la justice\"",
+                    "7. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix mis en œuvre par le programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
+                    "8. Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en République démocratique du Congo ;",
+                    "9. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC;",
+                    "10. Third Party Monitoring commandité par Humanitarian Grand Challenge Canada auprès de Nuru, Al Tech and Sentinel Project ;",
+                    "11. Evaluation finale du Projet : S-3G « Stabilisation, Genre et Garantie communautaire, Guichet Unique, Gestion de la chaîne d’approvisionnement des médicaments pour la santé sexuelle »",
+                    "12. Évaluation Finale : « Projet G1106-VBG, dignité, résilience et prévention »",
+                    "13. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)",
+                    "14. Analyse de l'État du Système humanitaire de l’ALNAP Cinquième Édition à l’Est de la RD Congo",
+                    "15. Enquête SCA, PDM, CAP du projet : Livelihood support to malnourished children and their families."
+                ],
+                partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; Rainforest Foundation Norway « RFN » ; InterAction; ACTED; The Research People; Cordaid; Tearfund; Lutheran World Federation « LWF »"
+            },
+            {
+                name: "Sud-Kivu",
+                lat: -2.822,
+                lng: 28.189,
+                staff: 81,
+                projets: [
+                    "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations affectées par les crises dans les contextes complexes de l’Est de la RDC.",
+                    "2. Analyse du contexte des conflits et réalisation d’une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix ‘’Kizazi Cha Amani : Génération paix pour les grands lacs’’.",
+                    "3. Renforcer la réponse d'urgence dans l'est de la RDC grâce à l'engagement communautaire.",
+                    "4. USAID's Sustainable Water and Sanitation Systems. « SWASSA ».",
+                    "5. Outcome Harvesting (Etude Moisson des effets) l’appréciation des relations entre les autorités judiciaires, frontalières et les populations locales, projet : \"Accès à la justice\"",
+                    "6. Programme d’Agriculture durable et meilleure protection des forêts tropicales en RD Congo « REDD+ NICFI »",
+                    "7. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
+                    "8. Evaluation finale du Projet: Emergency multi-sectoral response in food assistance, wash, shelter and CCCM to people affected by displacements, (EKU-BHA)",
+                    "9. Third Party Monitoring commandité par Humanitarian Grand Challenge Canada auprès de Nuru, Al Tech and Sentinel Project",
+                    "10. Evaluation finale du Projet : S-3G « Stabilisation, Genre et Garantie communautaire, Guichet Unique, Gestion de la chaîne d’approvisionnement des médicaments pour la santé sexuelle »",
+                    "11. Evaluation finale du projet : Mchango Wetu Kwa Amani",
+                    "12. Évaluation finale : « Projet Prévention et contrôle des maladies hydriques dans la zone de santé d’Uvira »",
+                    "13. Évaluation Finale : « Projet G1106-VBG, dignité, résilience et prévention »",
+                    "13. Évaluation multisectorielle de besoins et étude de Marché.",
+                    "14. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet",
+                    "15. Etude de base du projet d’agriculture durable et protection des forêts en RDC « REDD+ »",
+                    "15. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)",
+                    "16. Analyse de l'État du Système humanitaire de l’ALNAP Cinquième Édition à l’Est de la RD Congo",
+                    "17. Suivi Post Intervention et Évaluation Finale du projet PRERAC « Projet de Réponse Rapide au Sud-Kivu »",
+                    "18. Evaluation Rapide Multisectorielle et Suivi Post Intervention du projet KCRI “ Kivus Crisis Response for IDPs”"
+                ],
+                partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; InterAction; The Research People; Cordaid; Interpeace ; Croix-Rouge Française ; CARE International; Tearfund; Caritas International Belgique"
+            },
+            {
+                name: "Tanganyika",
+                lat: -6.067,
+                lng: 28.975,
+                staff: 42,
+                projets: [
+                    "Évaluation Finale : Projet de Réponse d’urgence aux besoins de santé des populations affectées par les conflits",
+                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet",
+                    "3. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+                ],
+                partenaires: "Médecins du Monde France; Tearfund"
+            },
+            {
+                name: "Haut-Katanga",
+                lat: -11.442,
+                lng: 27.694,
+                staff: 25,
+                projets: [
+                    "Évaluation indépendante du projet Laboratoire d’Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l’espace Katanga)",
+                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet"
+                ],
+                partenaires: "Parkinson's Progression Markers Initiative « PPMI »"
+            },
+            {
+                name: "Ituri",
+                lat: 1.684,
+                lng: 29.586,
+                staff: 36,
+                projets: [
+                    "1. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix mis en œuvre par le programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
+                    "2. Enquête annuelle du programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
+                    "3. Enquête de perception sur le projet : « Renforcer la redevabilité envers les populations affectées »",
+                    "4. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
+                    "5. Etude de Base projet MISEREOR II",
+                    "6. Évaluation multisectorielle de besoins et étude de Marché",
+                    "7. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+                ],
+                partenaires: "Ground Truth Solutions “GTS” ; InterAction; CARE International; Trocaire ; Tearfund"
+            },
+            {
+                name: "Maniema",
+                lat: -4.183,
+                lng: 26.167,
+                staff: 14,
+                projets: [
+                    "1.Evaluation mi-parcours Programme d’Agriculture durable et meilleure protection des forêts tropicales en RD Congo « REDD+ NICFI »",
+                    "2. Evaluation finale du Projet: Emergency multi-sectoral response in food assistance, wash, shelter and CCCM to people affected by displacements, (EKU-BHA)",
+                    "3. Etude de base du projet d’agriculture durable et protection des forêts en RDC « REDD+ »",
+                    "4. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+                ],
+                partenaires: "NORWEGIAN CHURCH AID « NCA » ; ACTED; Tearfund"
+            },
+            {
+                name: "Kasai",
+                lat: -5.947,
+                lng: 22.413,
+                staff: 14,
+                projets: [
+                    "Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »"
+                ],
+                partenaires: "Caritas International Belgique"
+            },
+            {
+                name: "Kasai-central",
+                lat: -5.898,
+                lng: 22.430,
+                staff: 19,
+                projets: [
+                    "Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »"
+                ],
+                partenaires: "Caritas International Belgique"
+            },
+            {
+                name: "Kinshasa",
+                lat: -4.322,
+                lng: 15.317,
+                staff: 30,
+                projets: [
+                    "Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
+                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet"
+                ],
+                partenaires: "InterAction"
+            },
+            {
+                name: "Equateur",
+                lat: -0.805,
+                lng: 19.412,
+                staff: 30,
+                projets: [
+                    "Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en République démocratique du Congo"
+                ],
+                partenaires: "Parkinson's Progression Markers Initiative « PPMI »; Rainforest Foundation Norway « RFN »"
+            },
+            {
+                name: "Lualaba",
+                lat: -9.667,
+                lng: 25.500,
+                staff: 10,
+                projets: [
+                    "Évaluation indépendante du projet Laboratoire d’Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l’espace Katanga)"
+                ],
+                partenaires: "Parkinson's Progression Markers Initiative « PPMI »"
+            }
+        ];
+
+        // ------------------ INIT MAP ------------------
+        const map = L.map('map', {
+            center: [-2.5, 23.5],
+            zoom: 6,
+            zoomControl: true,
+            fadeAnimation: true,
+            attributionControl: true
+        });
+
+        // fond de carte (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        }).addTo(map);
+
+        // fonction pour déterminer le rayon en fonction du staff (logarithme pour meilleur rendu)
+        function getRadius(staff) {
+            if (staff >= 100) return 45;
+            if (staff >= 50) return 34;
+            if (staff >= 25) return 24;
+            if (staff >= 10) return 18;
+            return 14;
+        }
+
+        // fonction pour la couleur des cercles (dégradé)
+        function getColor(staff) {
+            if (staff >= 100) return '#b84c0e';
+            if (staff >= 50) return '#e06b1f';
+            if (staff >= 25) return '#f58b3c';
+            if (staff >= 10) return '#f9a95c';
+            return '#fccb8c';
+        }
+
+        // ------------------ AJOUT DES MARQUEURS (cercles) ------------------
+        provincesData.forEach(prov => {
+            const radius = getRadius(prov.staff);
+            const color = getColor(prov.staff);
+            const fillOpacity = 0.75;
+
+            // Cercle
+            const circle = L.circle([prov.lat, prov.lng], {
+                radius: radius * 1600,   // ajustement pour échelle
+                color: '#ffffff',
+                weight: 2,
+                fillColor: color,
+                fillOpacity: fillOpacity,
+                opacity: 0.9,
+                className: 'province-circle'
+            }).addTo(map);
+
+            // Popup avec formatage
+            const popupContent = `
+                <div class="popup-title">📍 ${prov.name}</div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span style="background:#2a3f5a; padding:4px 16px; border-radius:40px; font-weight:700; color:#ffb347;">👥 ${prov.staff} staff</span>
+                </div>
+                <div class="popup-section">
+                    <strong>📋 Projets</strong>
+                    ${prov.projets.map(p => `<div class="popup-projet">${p}</div>`).join('')}
+                </div>
+                <div class="popup-section" style="margin-top:14px;">
+                    <strong>🤝 Partenaires</strong>
+                    <div style="margin-top:6px;">
+                        ${prov.partenaires.split(';').map(p => `<span class="popup-partner">${p.trim()}</span>`).join(' ')}
+                    </div>
+                </div>
+            `;
+
+            circle.bindPopup(popupContent, {
+                className: 'custom-popup',
+                maxWidth: 360,
+                closeButton: true
+            });
+
+            // petit effet : survol
+            circle.on('mouseover', function() {
+                this.setStyle({ weight: 4, color: '#ffd966' });
+            });
+            circle.on('mouseout', function() {
+                this.setStyle({ weight: 2, color: '#ffffff' });
+            });
+        });
+
+        // Ajustement des coordonnées pour bien centrer
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 200);
+
+        // Ajout d'un contrôle de zoom personnalisé (optionnel)
+        L.control.zoom({ position: 'topright' }).addTo(map);
+    })();
+</script>
+
+<!-- note : si vous utilisez un iframe, le fond s'adapte automatiquement -->
+</body>
+</html>
