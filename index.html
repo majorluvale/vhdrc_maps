@@ -39,6 +39,16 @@
             width: 100%;
             height: 100%;
             background: #eef0f2;
+            /* Désactiver le curseur de zoom */
+            cursor: default !important;
+        }
+        /* Masquer les contrôles de zoom */
+        .leaflet-control-zoom {
+            display: none !important;
+        }
+        /* Désactiver le curseur grab */
+        .leaflet-grab {
+            cursor: default !important;
         }
 
         /* --- Popup style clair, sans arrondi, sans icônes --- */
@@ -169,7 +179,7 @@
             .legend { bottom: 16px; right: 16px; padding: 10px 14px; font-size: 12px; min-width: 100px; }
         }
 
-        /* Scrollbar personnalisée (discrète) */
+        /* Scrollbar personnalisée */
         .popup-custom .leaflet-popup-content::-webkit-scrollbar {
             width: 4px;
         }
@@ -316,41 +326,46 @@
             }
         ];
 
-        // ---- Initialisation de la carte ----
+        // ---- Initialisation de la carte avec zoom bloqué ----
         const map = L.map('map', {
             center: [-2.8, 23.8],
             zoom: 6,
-            zoomControl: true
+            zoomControl: false,        // Désactive les boutons de zoom
+            scrollWheelZoom: false,    // Désactive le zoom avec la molette
+            doubleClickZoom: false,    // Désactive le zoom double-clic
+            touchZoom: false,          // Désactive le zoom tactile (pincement)
+            boxZoom: false,            // Désactive le zoom par sélection
+            dragging: false,           // Désactive le déplacement de la carte
+            keyboard: false,           // Désactive les raccourcis clavier
+            zoomSnap: false,
+            zoomDelta: false,
+            trackResize: false
         });
 
-        // ---- Fonds de carte : style "grisé" ----
-        // Utilisation d'un fond OpenStreetMap en niveaux de gris via un filtre CSS appliqué sur les tuiles
-        // On utilise un layer "gris" personnalisé avec des tuiles en niveau de gris.
-        // L'astuce : on charge un tileLayer standard et on applique un filtre CSS via le style de la classe.
-        // Mais pour un rendu plus propre on va utiliser un fond "CartoDB" en niveaux de gris (positron) 
-        // qui donne un très bon rendu gris clair pour les pays voisins.
+        // ---- Fond de carte en niveaux de gris ----
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB',
             subdomains: 'abcd',
             maxZoom: 19,
-            // on désature via un filtre CSS pour avoir un gris plus uniforme
-            // mais CartoDB light est déjà en tons pastel, on peut aussi appliquer un filtre global.
         }).addTo(map);
 
-        // On ajoute un filtre CSS sur les tuiles pour les rendre presque en niveaux de gris
-        // (on le fait via une classe ajoutée dynamiquement sur le conteneur)
+        // Filtre grayscale sur les tuiles
         document.getElementById('map').classList.add('grayscale-map');
-
-        // Style CSS pour le filtre grayscale
         const style = document.createElement('style');
         style.textContent = `
             .grayscale-map .leaflet-tile {
                 filter: grayscale(95%) brightness(1.05) contrast(0.95);
                 -webkit-filter: grayscale(95%) brightness(1.05) contrast(0.95);
             }
-            /* pour que les pays voisins soient bien gris clair */
             .grayscale-map .leaflet-tile-pane {
                 opacity: 0.95;
+            }
+            /* Désactiver complètement tout curseur interactif */
+            .leaflet-container {
+                cursor: default !important;
+            }
+            .leaflet-dragging .leaflet-grab {
+                cursor: default !important;
             }
         `;
         document.head.appendChild(style);
@@ -374,7 +389,9 @@
                 fillColor: '#6ec1e4',
                 fillOpacity: 0.65,
                 opacity: 0.9,
-                className: 'province-circle'
+                className: 'province-circle',
+                interactive: true,  // Les cercles restent cliquables
+                bubblingMouseEvents: false
             }).addTo(map);
 
             // Popup
@@ -402,6 +419,13 @@
             circle.on('mouseout', function() {
                 this.setStyle({ weight: 2.5, color: '#6ec1e4', fillOpacity: 0.65 });
             });
+        });
+
+        // Désactiver toute tentative de zoom ou déplacement via le clavier
+        document.addEventListener('keydown', function(e) {
+            if (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0') {
+                e.preventDefault();
+            }
         });
 
         // Ajustement
