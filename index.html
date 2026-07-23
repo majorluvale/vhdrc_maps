@@ -57,14 +57,16 @@
             padding: 0;
             border-left: 4px solid #6ec1e4;
             font-family: 'Roboto', sans-serif;
+            max-height: 500px;
+            overflow-y: auto;
         }
         .popup-custom .leaflet-popup-content {
             font-size: 13px;
             line-height: 1.5;
-            margin: 14px 16px;
-            max-height: 420px;
+            margin: 12px 14px;
+            max-height: 400px;
             overflow-y: auto;
-            padding-right: 4px;
+            padding-right: 2px;
         }
         .popup-custom .leaflet-popup-tip {
             background: #ffffff;
@@ -74,8 +76,8 @@
             color: #5a6b7c !important;
             font-size: 20px !important;
             font-weight: 300;
-            top: 6px;
-            right: 10px;
+            top: 4px;
+            right: 8px;
         }
         .popup-custom .leaflet-popup-close-button:hover {
             color: #1e2a3a !important;
@@ -83,47 +85,48 @@
 
         /* --- contenu popup --- */
         .popup-province {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #C084FC;
             letter-spacing: 0.3px;
             border-bottom: 1px solid #e6eaef;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
         }
         .popup-staff {
             display: inline-block;
             background: #f0f4fb;
             color: #1e2a3a;
             font-weight: 500;
-            padding: 2px 14px;
-            font-size: 14px;
-            margin-bottom: 12px;
+            padding: 2px 12px;
+            font-size: 13px;
+            margin-bottom: 10px;
             border: 1px solid #dce1e8;
         }
         .popup-label {
             font-weight: 700;
             color: #2c3e5a;
-            font-size: 14px;
-            margin-top: 14px;
-            margin-bottom: 4px;
+            font-size: 13px;
+            margin-top: 10px;
+            margin-bottom: 3px;
             display: block;
         }
         .popup-projet {
-            padding: 5px 0 5px 10px;
+            padding: 4px 0 4px 8px;
             border-left: 2px solid #6ec1e4;
-            margin-bottom: 5px;
-            font-size: 12.5px;
+            margin-bottom: 4px;
+            font-size: 12px;
             color: #1e2a3a;
             background: #fafbfc;
-            padding-right: 6px;
+            padding-right: 4px;
+            line-height: 1.4;
         }
         .popup-partner {
             display: inline-block;
             background: #f0f4fb;
-            padding: 2px 10px;
-            margin: 2px 4px 2px 0;
-            font-size: 12px;
+            padding: 2px 8px;
+            margin: 2px 3px 2px 0;
+            font-size: 11px;
             color: #1e2a3a;
             border: 1px solid #dce1e8;
         }
@@ -134,58 +137,59 @@
             bottom: 28px;
             right: 28px;
             background: #ffffff;
-            padding: 14px 20px;
+            padding: 12px 16px;
             border: 1px solid #dce1e8;
             box-shadow: 0 2px 10px rgba(0,0,0,0.06);
             font-family: 'Roboto', sans-serif;
-            font-size: 13px;
+            font-size: 12px;
             color: #1e2a3a;
             z-index: 1000;
             line-height: 1.6;
-            min-width: 130px;
+            min-width: 110px;
         }
         .legend .dot {
             display: inline-block;
             border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 6px;
             background: #6ec1e4;
             border: 1px solid #b0c7e0;
         }
-        .legend .dot-small { width: 12px; height: 12px; }
-        .legend .dot-med   { width: 18px; height: 18px; }
-        .legend .dot-large { width: 26px; height: 26px; }
-        .legend .dot-xl    { width: 34px; height: 34px; }
+        .legend .dot-small { width: 10px; height: 10px; }
+        .legend .dot-med   { width: 16px; height: 16px; }
+        .legend .dot-large { width: 22px; height: 22px; }
+        .legend .dot-xl    { width: 30px; height: 30px; }
         .legend-item {
             display: flex;
             align-items: center;
-            margin: 2px 0;
+            margin: 1px 0;
         }
         .legend-title {
             font-weight: 500;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             color: #2c3e5a;
             border-bottom: 1px solid #e6eaef;
-            padding-bottom: 4px;
+            padding-bottom: 3px;
         }
 
         @media (max-width: 640px) {
             .map-container { height: 95vh; max-height: 700px; }
-            .legend { bottom: 16px; right: 16px; padding: 10px 14px; font-size: 12px; min-width: 100px; }
+            .legend { bottom: 12px; right: 12px; padding: 8px 12px; font-size: 11px; min-width: 90px; }
+            .popup-custom .leaflet-popup-content {
+                font-size: 12px;
+                margin: 10px 12px;
+                max-height: 300px;
+            }
+            .popup-province { font-size: 16px; }
         }
 
         .popup-custom .leaflet-popup-content::-webkit-scrollbar {
-            width: 4px;
+            width: 3px;
         }
         .popup-custom .leaflet-popup-content::-webkit-scrollbar-track {
             background: #f0f2f5;
         }
         .popup-custom .leaflet-popup-content::-webkit-scrollbar-thumb {
             background: #c4cdd8;
-        }
-
-        /* Forcer les popups à rester dans l'écran */
-        .leaflet-popup {
-            pointer-events: auto !important;
         }
     </style>
 </head>
@@ -209,124 +213,128 @@
                 name: "Nord-Kivu", lat: -0.571, lng: 28.674, staff: 131,
                 projets: [
                     "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations affectées par les crises dans les contextes complexes de l’Est de la RDC.",
-                    "2. Analyse du contexte des conflits et réalisation d’une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix ‘’Kizazi Cha Amani : Génération paix pour les grands lacs’’.",
+                    "2. Analyse du contexte des conflits et réalisation d’une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix.",
                     "3. Renforcer la réponse d'urgence dans l'est de la RDC grâce à l'engagement communautaire.",
                     "4. Evaluation finale du projet WASH dans les territoires de Nyiragongo et Goma.",
                     "5. USAID's Sustainable Water and Sanitation Systems. « SWASSA ».",
                     "5. Programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
-                    "6. Outcome Harvesting (Etude Moisson des effets) l’appréciation des relations entre les autorités judiciaires, frontalières et les populations locales, projet : \" Accès à la justice\"",
-                    "7. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix mis en œuvre par le programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
-                    "8. Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en République démocratique du Congo ;",
-                    "9. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC;",
-                    "10. Third Party Monitoring commandité par Humanitarian Grand Challenge Canada auprès de Nuru, Al Tech and Sentinel Project ;",
-                    "11. Evaluation finale du Projet : S-3G « Stabilisation, Genre et Garantie communautaire, Guichet Unique, Gestion de la chaîne d’approvisionnement des médicaments pour la santé sexuelle »",
-                    "12. Évaluation Finale : « Projet G1106-VBG, dignité, résilience et prévention »",
-                    "13. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)",
-                    "14. Analyse de l'État du Système humanitaire de l’ALNAP Cinquième Édition à l’Est de la RD Congo",
-                    "15. Enquête SCA, PDM, CAP du projet : Livelihood support to malnourished children and their families."
+                    "6. Outcome Harvesting (Etude Moisson des effets) l’appréciation des relations entre les autorités judiciaires, frontalières et les populations locales.",
+                    "7. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix.",
+                    "8. Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en RDC.",
+                    "9. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC.",
+                    "10. Third Party Monitoring commandité par Humanitarian Grand Challenge Canada.",
+                    "11. Evaluation finale du Projet : S-3G « Stabilisation, Genre et Garantie communautaire ».",
+                    "12. Évaluation Finale : « Projet G1106-VBG, dignité, résilience et prévention ».",
+                    "13. Évaluation d'impact des projets mise en œuvre par Tearfund.",
+                    "14. Analyse de l'État du Système humanitaire de l’ALNAP Cinquième Édition à l’Est de la RD Congo.",
+                    "15. Enquête SCA, PDM, CAP du projet : Livelihood support to malnourished children."
                 ],
-                partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; Rainforest Foundation Norway « RFN » ; InterAction; ACTED; The Research People; Cordaid; Tearfund; Lutheran World Federation « LWF »"
+                partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; Rainforest Foundation Norway; InterAction; ACTED; The Research People; Cordaid; Tearfund; Lutheran World Federation"
             },
             {
                 name: "Sud-Kivu", lat: -2.822, lng: 28.189, staff: 81,
                 projets: [
-                    "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations affectées par les crises dans les contextes complexes de l’Est de la RDC.",
-                    "2. Analyse du contexte des conflits et réalisation d’une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix ‘’Kizazi Cha Amani : Génération paix pour les grands lacs’’.",
+                    "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations.",
+                    "2. Analyse du contexte des conflits et réalisation d’une cartographie des réseaux.",
                     "3. Renforcer la réponse d'urgence dans l'est de la RDC grâce à l'engagement communautaire.",
                     "4. USAID's Sustainable Water and Sanitation Systems. « SWASSA ».",
-                    "5. Outcome Harvesting (Etude Moisson des effets) l’appréciation des relations entre les autorités judiciaires, frontalières et les populations locales, projet : \"Accès à la justice\"",
-                    "6. Programme d’Agriculture durable et meilleure protection des forêts tropicales en RD Congo « REDD+ NICFI »",
-                    "7. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
-                    "8. Evaluation finale du Projet: Emergency multi-sectoral response in food assistance, wash, shelter and CCCM to people affected by displacements, (EKU-BHA)",
-                    "9. Third Party Monitoring commandité par Humanitarian Grand Challenge Canada auprès de Nuru, Al Tech and Sentinel Project",
-                    "10. Evaluation finale du Projet : S-3G « Stabilisation, Genre et Garantie communautaire, Guichet Unique, Gestion de la chaîne d’approvisionnement des médicaments pour la santé sexuelle »",
-                    "11. Evaluation finale du projet : Mchango Wetu Kwa Amani",
-                    "12. Évaluation finale : « Projet Prévention et contrôle des maladies hydriques dans la zone de santé d’Uvira »",
-                    "13. Évaluation Finale : « Projet G1106-VBG, dignité, résilience et prévention »",
+                    "5. Outcome Harvesting (Etude Moisson des effets) l’appréciation des relations entre les autorités.",
+                    "6. Programme d’Agriculture durable et meilleure protection des forêts tropicales en RD Congo.",
+                    "7. Leadership Local dans la réponse humanitaire dans le secteur des Abris.",
+                    "8. Evaluation finale du Projet: Emergency multi-sectoral response.",
+                    "9. Third Party Monitoring commandité par Humanitarian Grand Challenge Canada.",
+                    "10. Evaluation finale du Projet : S-3G.",
+                    "11. Evaluation finale du projet : Mchango Wetu Kwa Amani.",
+                    "12. Évaluation finale : Projet Prévention et contrôle des maladies hydriques.",
+                    "13. Évaluation Finale : Projet G1106-VBG.",
                     "13. Évaluation multisectorielle de besoins et étude de Marché.",
-                    "14. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet",
-                    "15. Etude de base du projet d’agriculture durable et protection des forêts en RDC « REDD+ »",
-                    "15. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)",
-                    "16. Analyse de l'État du Système humanitaire de l’ALNAP Cinquième Édition à l’Est de la RD Congo",
-                    "17. Suivi Post Intervention et Évaluation Finale du projet PRERAC « Projet de Réponse Rapide au Sud-Kivu »",
-                    "18. Evaluation Rapide Multisectorielle et Suivi Post Intervention du projet KCRI “ Kivus Crisis Response for IDPs”"
+                    "14. Evaluation Finale du Projet : Gender-Responsive Radio Education.",
+                    "15. Etude de base du projet d’agriculture durable.",
+                    "15. Évaluation d'impact des projets Tearfund.",
+                    "16. Analyse de l'État du Système humanitaire de l’ALNAP.",
+                    "17. Suivi Post Intervention et Évaluation Finale du projet PRERAC.",
+                    "18. Evaluation Rapide Multisectorielle du projet KCRI."
                 ],
-                partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; InterAction; The Research People; Cordaid; Interpeace ; Croix-Rouge Française ; CARE International; Tearfund; Caritas International Belgique"
+                partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; InterAction; The Research People; Cordaid; Interpeace; Croix-Rouge Française; CARE International; Tearfund; Caritas International Belgique"
             },
             {
                 name: "Tanganyika", lat: -6.067, lng: 28.975, staff: 42,
                 projets: [
-                    "Évaluation Finale : Projet de Réponse d’urgence aux besoins de santé des populations affectées par les conflits",
-                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet",
-                    "3. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+                    "Évaluation Finale : Projet de Réponse d’urgence aux besoins de santé.",
+                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education.",
+                    "3. Évaluation d'impact des projets Tearfund."
                 ],
                 partenaires: "Médecins du Monde France; Tearfund"
             },
             {
                 name: "Haut-Katanga", lat: -11.442, lng: 27.694, staff: 25,
                 projets: [
-                    "Évaluation indépendante du projet Laboratoire d’Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l’espace Katanga)",
-                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet"
+                    "Évaluation indépendante du projet Laboratoire d’Accélération 8.7 (éradiquer les pires formes de travail des enfants).",
+                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education."
                 ],
-                partenaires: "Parkinson's Progression Markers Initiative « PPMI »"
+                partenaires: "Parkinson's Progression Markers Initiative"
             },
             {
                 name: "Ituri", lat: 1.684, lng: 29.586, staff: 36,
                 projets: [
-                    "1. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix mis en œuvre par le programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
-                    "2. Enquête annuelle du programme de Partenariat pour le Développement de l’Est du Congo de l’USAID (P-DEC), Tujenge.",
-                    "3. Enquête de perception sur le projet : « Renforcer la redevabilité envers les populations affectées »",
-                    "4. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
-                    "5. Etude de Base projet MISEREOR II",
-                    "6. Évaluation multisectorielle de besoins et étude de Marché",
-                    "7. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+                    "1. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix.",
+                    "2. Enquête annuelle du programme de Partenariat pour le Développement de l’Est du Congo.",
+                    "3. Enquête de perception sur le projet : Renforcer la redevabilité.",
+                    "4. Leadership Local dans la réponse humanitaire.",
+                    "5. Etude de Base projet MISEREOR II.",
+                    "6. Évaluation multisectorielle de besoins et étude de Marché.",
+                    "7. Évaluation d'impact des projets Tearfund."
                 ],
-                partenaires: "Ground Truth Solutions “GTS” ; InterAction; CARE International; Trocaire ; Tearfund"
+                partenaires: "Ground Truth Solutions; InterAction; CARE International; Trocaire; Tearfund"
             },
             {
                 name: "Maniema", lat: -4.183, lng: 26.167, staff: 14,
                 projets: [
-                    "1.Evaluation mi-parcours Programme d’Agriculture durable et meilleure protection des forêts tropicales en RD Congo « REDD+ NICFI »",
-                    "2. Evaluation finale du Projet: Emergency multi-sectoral response in food assistance, wash, shelter and CCCM to people affected by displacements, (EKU-BHA)",
-                    "3. Etude de base du projet d’agriculture durable et protection des forêts en RDC « REDD+ »",
-                    "4. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+                    "1.Evaluation mi-parcours Programme d’Agriculture durable.",
+                    "2. Evaluation finale du Projet: Emergency multi-sectoral response.",
+                    "3. Etude de base du projet d’agriculture durable.",
+                    "4. Évaluation d'impact des projets Tearfund."
                 ],
-                partenaires: "NORWEGIAN CHURCH AID « NCA » ; ACTED; Tearfund"
+                partenaires: "Norwegian Church Aid; ACTED; Tearfund"
             },
             {
                 name: "Kasai", lat: -5.947, lng: 22.413, staff: 14,
-                projets: [ "Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »" ],
+                projets: [ "Evaluation Finale du projet PODCH." ],
                 partenaires: "Caritas International Belgique"
             },
             {
                 name: "Kasai-central", lat: -5.898, lng: 22.430, staff: 19,
-                projets: [ "Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »" ],
+                projets: [ "Evaluation Finale du projet PODCH." ],
                 partenaires: "Caritas International Belgique"
             },
             {
                 name: "Kinshasa", lat: -4.322, lng: 15.317, staff: 30,
                 projets: [
-                    "Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
-                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet"
+                    "Leadership Local dans la réponse humanitaire.",
+                    "2. Evaluation Finale du Projet : Gender-Responsive Radio Education."
                 ],
                 partenaires: "InterAction"
             },
             {
                 name: "Equateur", lat: -0.805, lng: 19.412, staff: 30,
-                projets: [ "Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en République démocratique du Congo" ],
-                partenaires: "Parkinson's Progression Markers Initiative « PPMI »; Rainforest Foundation Norway « RFN »"
+                projets: [ "Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC)." ],
+                partenaires: "Parkinson's Progression Markers Initiative; Rainforest Foundation Norway"
             },
             {
                 name: "Lualaba", lat: -9.667, lng: 25.500, staff: 10,
-                projets: [ "Évaluation indépendante du projet Laboratoire d’Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l’espace Katanga)" ],
-                partenaires: "Parkinson's Progression Markers Initiative « PPMI »"
+                projets: [ "Évaluation indépendante du projet Laboratoire d’Accélération 8.7." ],
+                partenaires: "Parkinson's Progression Markers Initiative"
             }
         ];
 
+        // ---- Position fixe ----
+        const FIXED_CENTER = [-2.8, 23.8];
+        const FIXED_ZOOM = 6;
+
         // ---- Initialisation de la carte avec zoom bloqué ----
         const map = L.map('map', {
-            center: [-2.8, 23.8],
-            zoom: 6,
+            center: FIXED_CENTER,
+            zoom: FIXED_ZOOM,
             zoomControl: false,
             scrollWheelZoom: false,
             doubleClickZoom: false,
@@ -365,6 +373,11 @@
         `;
         document.head.appendChild(style);
 
+        // ---- Fonction pour réinitialiser la vue ----
+        function resetView() {
+            map.setView(FIXED_CENTER, FIXED_ZOOM, { animate: false });
+        }
+
         // ---- Fonction pour le rayon des cercles ----
         function getRadius(staff) {
             if (staff >= 80) return 42;
@@ -374,7 +387,7 @@
             return 14;
         }
 
-        // ---- Ajout des cercles avec popup ancré ----
+        // ---- Ajout des cercles ----
         provinces.forEach(prov => {
             const radius = getRadius(prov.staff);
             const circle = L.circle([prov.lat, prov.lng], {
@@ -389,38 +402,62 @@
                 bubblingMouseEvents: false
             }).addTo(map);
 
-            // Contenu du popup
+            // Contenu du popup (version courte pour éviter les débordements)
             const popupContent = `
                 <div class="popup-province">${prov.name}</div>
                 <div class="popup-staff">Staff : ${prov.staff}</div>
                 <span class="popup-label">Projets</span>
                 ${prov.projets.map(p => `<div class="popup-projet">${p}</div>`).join('')}
-                <span class="popup-label" style="margin-top:16px;">Partenaires</span>
-                <div style="margin-top:4px;">
+                <span class="popup-label" style="margin-top:12px;">Partenaires</span>
+                <div style="margin-top:3px;">
                     ${prov.partenaires.split(';').map(p => `<span class="popup-partner">${p.trim()}</span>`).join(' ')}
                 </div>
             `;
 
-            // Créer le popup avec des options pour contrôler sa position
+            // Popup avec options pour éviter le déplacement
             const popup = L.popup({
                 className: 'popup-custom',
-                maxWidth: 380,
+                maxWidth: 350,
+                minWidth: 260,
                 closeButton: true,
-                // Force le popup à s'ouvrir vers le haut ou la droite
-                // pour éviter qu'il ne pousse la carte vers le bas
-                offset: [0, -20], // Décalage vers le haut
-                autoPan: false,   // Désactive le déplacement automatique de la carte
-                keepInView: false // Ne force pas la carte à rester dans la vue
+                autoPan: false,
+                keepInView: false,
+                autoClose: true,
+                closeOnClick: true,
+                offset: [10, -10]  // Décalage vers la droite et le haut
             });
 
-            // Lier le popup au cercle
             circle.bindPopup(popupContent, {
                 className: 'popup-custom',
-                maxWidth: 380,
+                maxWidth: 350,
+                minWidth: 260,
                 closeButton: true,
-                offset: [0, -15],
                 autoPan: false,
-                keepInView: false
+                keepInView: false,
+                autoClose: true,
+                closeOnClick: true,
+                offset: [10, -10]
+            });
+
+            // ---- FORCER la direction du popup vers la droite ----
+            // On ajoute un écouteur pour repositionner le popup
+            circle.on('popupopen', function(e) {
+                // Réinitialiser la vue immédiatement
+                resetView();
+                
+                // Forcer le popup à rester à droite
+                const popupEl = e.popup._container;
+                if (popupEl) {
+                    // S'assurer que le popup est bien positionné
+                    setTimeout(() => {
+                        resetView();
+                    }, 10);
+                }
+            });
+
+            // Réinitialiser quand le popup se ferme
+            circle.on('popupclose', function() {
+                resetView();
             });
 
             // Effet survol
@@ -430,47 +467,35 @@
             circle.on('mouseout', function() {
                 this.setStyle({ weight: 2.5, color: '#6ec1e4', fillOpacity: 0.65 });
             });
-
-            // CORRECTION : Empêcher le popup de faire bouger la carte
-            circle.on('click', function() {
-                // On force le popup à rester ancré au cercle sans déplacer la carte
-                const popup = this.getPopup();
-                if (popup) {
-                    popup.setContent(popupContent);
-                    popup.update();
-                }
-            });
         });
 
-        // ---- FORCER la carte à ne jamais bouger ----
-        // Réinitialiser la position si jamais elle bouge
-        const fixedCenter = [-2.8, 23.8];
-        const fixedZoom = 6;
-
-        // Surveiller les changements de vue et les annuler
+        // ---- SURVEILLANCE PERMANENTE de la position ----
+        // Réinitialiser la vue à chaque fois qu'elle bouge
         map.on('moveend', function() {
-            if (map.getCenter().lat !== fixedCenter[0] || map.getCenter().lng !== fixedCenter[1]) {
-                map.setView(fixedCenter, fixedZoom, { animate: false });
-            }
-            if (map.getZoom() !== fixedZoom) {
-                map.setZoom(fixedZoom, { animate: false });
+            const center = map.getCenter();
+            const zoom = map.getZoom();
+            if (center.lat !== FIXED_CENTER[0] || center.lng !== FIXED_CENTER[1] || zoom !== FIXED_ZOOM) {
+                resetView();
             }
         });
 
-        // Au cas où, forcer la position après un délai
-        setTimeout(() => {
-            map.setView(fixedCenter, fixedZoom, { animate: false });
-        }, 100);
+        // Réinitialiser après un délai pour être sûr
+        setInterval(() => {
+            resetView();
+        }, 1000);
 
-        // Désactiver toute tentative de zoom
+        // Désactiver le zoom clavier
         document.addEventListener('keydown', function(e) {
             if (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0') {
                 e.preventDefault();
             }
         });
 
-        // Ajustement
-        setTimeout(() => map.invalidateSize(), 300);
+        // Ajustement initial
+        setTimeout(() => {
+            resetView();
+            map.invalidateSize();
+        }, 300);
     })();
 </script>
 </body>
