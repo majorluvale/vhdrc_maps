@@ -1,504 +1,734 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Carte RDC - Interventions</title>
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Police Roboto -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background: #f5f7fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            font-family: 'Roboto', sans-serif;
-        }
-        .map-container {
-            width: 100%;
-            max-width: 1300px;
-            height: 90vh;
-            max-height: 820px;
-            background: #ffffff;
-            border: 1px solid #dce1e8;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            overflow: hidden;
-            position: relative;
-        }
-        #map {
-            width: 100%;
-            height: 100%;
-            background: #eef0f2;
-            cursor: default !important;
-        }
-        .leaflet-control-zoom {
-            display: none !important;
-        }
-        .leaflet-grab {
-            cursor: default !important;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Présence terrain — RD Congo</title>
+<meta name="description" content="Carte interactive du staff, des projets et des partenaires par province en République Démocratique du Congo.">
 
-        /* --- Popup style clair avec scroll --- */
-        .popup-custom .leaflet-popup-content-wrapper {
-            background: #ffffff;
-            color: #1e2a3a;
-            border-radius: 0 !important;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-            padding: 0;
-            border-left: 4px solid #6ec1e4;
-            font-family: 'Roboto', sans-serif;
-            max-height: 450px;
-            overflow: hidden;
-        }
-        .popup-custom .leaflet-popup-content {
-            font-size: 13px;
-            line-height: 1.5;
-            margin: 12px 14px;
-            max-height: 380px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        .popup-custom .leaflet-popup-tip {
-            background: #ffffff;
-            border-radius: 0 !important;
-        }
-        .popup-custom .leaflet-popup-close-button {
-            color: #5a6b7c !important;
-            font-size: 22px !important;
-            font-weight: 300;
-            top: 4px;
-            right: 8px;
-            z-index: 10;
-            background: #ffffff;
-            padding: 0 4px;
-            line-height: 1;
-        }
-        .popup-custom .leaflet-popup-close-button:hover {
-            color: #1e2a3a !important;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        /* --- contenu popup --- */
-        .popup-province {
-            font-size: 19px;
-            font-weight: 700;
-            color: #C084FC;
-            letter-spacing: 0.3px;
-            border-bottom: 1px solid #e6eaef;
-            padding-bottom: 5px;
-            margin-bottom: 8px;
-            padding-right: 20px;
-        }
-        .popup-staff {
-            display: inline-block;
-            background: #f0f4fb;
-            color: #1e2a3a;
-            font-weight: 500;
-            padding: 2px 12px;
-            font-size: 13px;
-            margin-bottom: 8px;
-            border: 1px solid #dce1e8;
-        }
-        .popup-label {
-            font-weight: 700;
-            color: #2c3e5a;
-            font-size: 13px;
-            margin-top: 8px;
-            margin-bottom: 3px;
-            display: block;
-        }
-        .popup-projet {
-            padding: 4px 0 4px 8px;
-            border-left: 2px solid #6ec1e4;
-            margin-bottom: 3px;
-            font-size: 12px;
-            color: #1e2a3a;
-            background: #fafbfc;
-            padding-right: 4px;
-            line-height: 1.4;
-        }
-        .popup-partner {
-            display: inline-block;
-            background: #f0f4fb;
-            padding: 2px 8px;
-            margin: 2px 3px 2px 0;
-            font-size: 11px;
-            color: #1e2a3a;
-            border: 1px solid #dce1e8;
-        }
-        .popup-partners-container {
-            margin-top: 3px;
-            margin-bottom: 2px;
-        }
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-        /* --- Légende --- */
-        .legend {
-            position: absolute;
-            bottom: 28px;
-            right: 28px;
-            background: #ffffff;
-            padding: 12px 16px;
-            border: 1px solid #dce1e8;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            font-family: 'Roboto', sans-serif;
-            font-size: 12px;
-            color: #1e2a3a;
-            z-index: 1000;
-            line-height: 1.6;
-            min-width: 110px;
-            pointer-events: none;
-        }
-        .legend .dot {
-            display: inline-block;
-            border-radius: 50%;
-            margin-right: 6px;
-            background: #6ec1e4;
-            border: 1px solid #b0c7e0;
-        }
-        .legend .dot-small { width: 10px; height: 10px; }
-        .legend .dot-med   { width: 16px; height: 16px; }
-        .legend .dot-large { width: 22px; height: 22px; }
-        .legend .dot-xl    { width: 30px; height: 30px; }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin: 1px 0;
-        }
-        .legend-title {
-            font-weight: 500;
-            margin-bottom: 3px;
-            color: #2c3e5a;
-            border-bottom: 1px solid #e6eaef;
-            padding-bottom: 3px;
-        }
+<style>
+  :root{
+    --ink:        #0d1420;
+    --panel:      #131c2b;
+    --panel-2:    #17223405;
+    --line:       #263248;
+    --text:       #e8edf7;
+    --muted:      #8ea0bd;
+    --gold:       #f2c14e;
+    --gold-dim:   #d7ac48;
+    --bin-1:      #f6c98a;
+    --bin-2:      #f0a34a;
+    --bin-3:      #e0791f;
+    --bin-4:      #b8501f;
+    --radius-lg:  18px;
+    --radius-md:  12px;
+    --radius-sm:  8px;
+    --sidebar-w:  340px;
+  }
 
-        @media (max-width: 640px) {
-            .map-container { height: 95vh; max-height: 700px; }
-            .legend { bottom: 12px; right: 12px; padding: 8px 12px; font-size: 11px; min-width: 90px; }
-            .popup-custom .leaflet-popup-content {
-                font-size: 12px;
-                margin: 10px 12px;
-                max-height: 280px;
-            }
-            .popup-province { font-size: 16px; }
-            .popup-custom .leaflet-popup-content-wrapper { max-height: 350px; }
-        }
+  *{ margin:0; padding:0; box-sizing:border-box; }
 
-        .popup-custom .leaflet-popup-content::-webkit-scrollbar {
-            width: 4px;
-        }
-        .popup-custom .leaflet-popup-content::-webkit-scrollbar-track {
-            background: #f0f2f5;
-        }
-        .popup-custom .leaflet-popup-content::-webkit-scrollbar-thumb {
-            background: #c4cdd8;
-            border-radius: 2px;
-        }
-        
-        .leaflet-popup {
-            pointer-events: auto !important;
-        }
-    </style>
+  html, body{ height:100%; }
+
+  body{
+    background: var(--ink);
+    color: var(--text);
+    font-family:'Inter', -apple-system, sans-serif;
+    overflow:hidden;
+  }
+
+  .app{
+    display:grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr;
+    height:100vh;
+  }
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:14px 20px;
+    background: linear-gradient(180deg, #131c2b, #101827);
+    border-bottom:1px solid var(--line);
+    z-index:1200;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+  }
+  .brand-mark{
+    width:36px; height:36px;
+    border-radius:10px;
+    background: linear-gradient(135deg, var(--gold), var(--bin-3));
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+    flex-shrink:0;
+  }
+  .brand-text h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:16px;
+    font-weight:600;
+    letter-spacing:0.2px;
+    white-space:nowrap;
+  }
+  .brand-text p{
+    font-size:12px;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .stats{
+    display:flex;
+    gap:22px;
+  }
+  .stat{ text-align:right; }
+  .stat b{
+    display:block;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:19px;
+    color:var(--gold);
+    line-height:1.1;
+  }
+  .stat span{
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+  }
+  .menu-btn{
+    display:none;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--text);
+    border-radius:var(--radius-sm);
+    width:38px; height:38px;
+    font-size:16px;
+    cursor:pointer;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .body-grid{
+    display:grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height:0;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    background: var(--panel);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
+  .sidebar-inner{
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    min-height:0;
+    flex:1;
+  }
+  .search-box{
+    position:relative;
+  }
+  .search-box input{
+    width:100%;
+    background:#0f1826;
+    border:1px solid var(--line);
+    color:var(--text);
+    border-radius:var(--radius-sm);
+    padding:10px 12px 10px 34px;
+    font-size:13px;
+    font-family:inherit;
+    outline:none;
+  }
+  .search-box input:focus{ border-color: var(--gold-dim); }
+  .search-box::before{
+    content:"🔍";
+    position:absolute;
+    left:11px; top:50%;
+    transform:translateY(-50%);
+    font-size:12px;
+    opacity:0.6;
+  }
+
+  .legend-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:#0f1826;
+    border:1px solid var(--line);
+    color:var(--muted);
+    border-radius:30px;
+    padding:5px 10px 5px 8px;
+    font-size:11.5px;
+    cursor:pointer;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .chip .dot{
+    width:9px; height:9px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .chip.active{
+    border-color: var(--gold-dim);
+    color: var(--text);
+    background:#1a2436;
+  }
+  .chip:hover{ color:var(--text); }
+
+  .list-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+  }
+
+  .province-list{
+    list-style:none;
+    overflow-y:auto;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding-right:4px;
+    margin-right:-4px;
+  }
+  .province-list::-webkit-scrollbar{ width:6px; }
+  .province-list::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
+
+  .province-card{
+    background:#0f1826;
+    border:1px solid var(--line);
+    border-radius:var(--radius-md);
+    padding:11px 12px;
+    cursor:pointer;
+    transition: border-color .15s, transform .1s, opacity .15s;
+  }
+  .province-card:hover{ border-color: var(--gold-dim); }
+  .province-card:active{ transform: scale(0.99); }
+  .province-card.dimmed{ opacity:0.32; }
+  .pc-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .pc-name{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:600;
+    font-size:13.5px;
+  }
+  .pc-name .dot{
+    width:10px; height:10px;
+    border-radius:50%;
+    flex-shrink:0;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+  }
+  .pc-staff{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:12.5px;
+    color:var(--gold);
+    background:#1a2436;
+    border-radius:20px;
+    padding:2px 9px;
+    flex-shrink:0;
+  }
+  .pc-meta{
+    margin-top:6px;
+    font-size:11.5px;
+    color:var(--muted);
+    padding-left:18px;
+  }
+
+  .empty-state{
+    color:var(--muted);
+    font-size:12.5px;
+    text-align:center;
+    padding:30px 10px;
+  }
+
+  /* ---------- MAP ---------- */
+  .mapwrap{ position:relative; min-height:0; }
+  #map{ width:100%; height:100%; background:var(--ink); }
+
+  .reset-btn{
+    position:absolute;
+    top:14px; left:14px;
+    z-index:800;
+    background: var(--panel);
+    border:1px solid var(--line);
+    color:var(--text);
+    border-radius:var(--radius-sm);
+    padding:8px 13px;
+    font-size:12.5px;
+    font-family:inherit;
+    font-weight:500;
+    cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,0.35);
+  }
+  .reset-btn:hover{ border-color: var(--gold-dim); }
+
+  /* ---------- POPUP ---------- */
+  .leaflet-popup-content-wrapper{
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.55);
+    border:1px solid var(--line);
+  }
+  .leaflet-popup-tip{ background: var(--panel); }
+  .leaflet-popup-content{
+    margin:14px 16px;
+    font-size:13px;
+    line-height:1.5;
+    max-height:min(50vh, 420px);
+    overflow-y:auto;
+    width:320px !important;
+  }
+  .leaflet-popup-close-button{ color:var(--muted) !important; }
+
+  .popup-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:17px;
+    font-weight:600;
+    color: var(--gold);
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+    margin-bottom:10px;
+  }
+  .popup-staff-badge{
+    display:inline-block;
+    background:#1a2436;
+    color: var(--gold);
+    padding:3px 12px;
+    border-radius:30px;
+    font-weight:600;
+    font-size:12.5px;
+    margin-bottom:12px;
+  }
+  .popup-section strong{
+    display:block;
+    color:#9fc4e8;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    margin-bottom:7px;
+  }
+  .popup-projet{
+    background:#0f1826;
+    border-left:3px solid var(--gold-dim);
+    border-radius:7px;
+    padding:6px 9px;
+    margin-bottom:6px;
+    font-size:12.5px;
+  }
+  .popup-partner{
+    display:inline-block;
+    background:#0f1826;
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:3px 10px;
+    margin:2px 4px 2px 0;
+    font-size:11.5px;
+    color:var(--muted);
+  }
+  .popup-section{ margin-top:12px; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 760px){
+    .stats{ display:none; }
+    .menu-btn{ display:block; }
+    .body-grid{ grid-template-columns: 1fr; position:relative; }
+    .sidebar{
+      position:absolute;
+      inset:0 0 0 0;
+      z-index:1100;
+      width:100%;
+      transform: translateX(-100%);
+      transition: transform .22s ease;
+    }
+    .sidebar.open{ transform: translateX(0); }
+    .mapwrap{ grid-column: 1; }
+  }
+</style>
 </head>
 <body>
-<div class="map-container">
-    <div id="map"></div>
-    <div class="legend">
-        <div class="legend-title">Effectifs staff</div>
-        <div class="legend-item"><span class="dot dot-small"></span> 10 – 19</div>
-        <div class="legend-item"><span class="dot dot-med"></span> 20 – 39</div>
-        <div class="legend-item"><span class="dot dot-large"></span> 40 – 79</div>
-        <div class="legend-item"><span class="dot dot-xl"></span> 80 +</div>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <button class="menu-btn" id="menuBtn" aria-label="Ouvrir la liste des provinces">☰</button>
+      <div class="brand-mark">🇨🇩</div>
+      <div class="brand-text">
+        <h1>Présence terrain — RD Congo</h1>
+        <p>Staff, projets &amp; partenaires par province</p>
+      </div>
     </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="body-grid">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-inner">
+        <div class="search-box">
+          <input id="searchInput" type="text" placeholder="Rechercher une province…" autocomplete="off">
+        </div>
+
+        <div class="legend-chips" id="legendChips"></div>
+
+        <div class="list-label">
+          <span>Provinces</span>
+          <span id="listCount"></span>
+        </div>
+
+        <ul class="province-list" id="provinceList"></ul>
+      </div>
+    </aside>
+
+    <div class="mapwrap">
+      <button class="reset-btn" id="resetBtn">↺ Vue d'ensemble RDC</button>
+      <div id="map"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-    (function() {
-        // ---- Données des provinces ----
-        const provinces = [
-            {
-                name: "Nord-Kivu", lat: -0.571, lng: 28.674, staff: 131,
-                projets: [
-                    "1. Évaluation continue en temps réel des perceptions, priorités et expériences.",
-                    "2. Analyse du contexte des conflits et cartographie des réseaux de jeunes pour la paix.",
-                    "3. Renforcer la réponse d'urgence dans l'est de la RDC.",
-                    "4. Evaluation finale du projet WASH à Nyiragongo et Goma.",
-                    "5. USAID's Sustainable Water and Sanitation Systems (SWASSA).",
-                    "5. Programme de Partenariat pour le Développement de l’Est du Congo (P-DEC).",
-                    "6. Outcome Harvesting - relations entre autorités judiciaires et populations.",
-                    "7. Outcome Harvesting - dialogues communautaires pour la paix.",
-                    "8. Facilité Forestière pour les peuples autochtones (IPLC) en RDC.",
-                    "9. Leadership Local dans la réponse humanitaire.",
-                    "10. Third Party Monitoring pour Humanitarian Grand Challenge Canada.",
-                    "11. Evaluation finale du Projet S-3G.",
-                    "12. Évaluation Finale : Projet G1106-VBG.",
-                    "13. Évaluation d'impact des projets Tearfund.",
-                    "14. Analyse de l'État du Système humanitaire ALNAP.",
-                    "15. Enquête SCA, PDM, CAP - Livelihood support."
-                ],
-                partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; Rainforest Foundation Norway; InterAction; ACTED; The Research People; Cordaid; Tearfund; Lutheran World Federation"
-            },
-            {
-                name: "Sud-Kivu", lat: -2.822, lng: 28.189, staff: 81,
-                projets: [
-                    "1. Évaluation continue en temps réel des perceptions.",
-                    "2. Analyse du contexte des conflits et cartographie.",
-                    "3. Renforcer la réponse d'urgence dans l'est de la RDC.",
-                    "4. USAID's Sustainable Water and Sanitation Systems (SWASSA).",
-                    "5. Outcome Harvesting - relations entre autorités.",
-                    "6. Programme d’Agriculture durable (REDD+ NICFI).",
-                    "7. Leadership Local dans la réponse humanitaire.",
-                    "8. Evaluation finale Emergency multi-sectoral response.",
-                    "9. Third Party Monitoring pour Humanitarian Grand Challenge.",
-                    "10. Evaluation finale du Projet S-3G.",
-                    "11. Evaluation finale du projet Mchango Wetu Kwa Amani.",
-                    "12. Évaluation finale : Projet Prévention des maladies hydriques.",
-                    "13. Évaluation Finale : Projet G1106-VBG.",
-                    "13. Évaluation multisectorielle de besoins.",
-                    "14. Evaluation Finale : Gender-Responsive Radio Education.",
-                    "15. Etude de base du projet REDD+.",
-                    "15. Évaluation d'impact des projets Tearfund.",
-                    "16. Analyse de l'État du Système humanitaire ALNAP.",
-                    "17. Suivi Post Intervention PRERAC.",
-                    "18. Evaluation Rapide Multisectorielle KCRI."
-                ],
-                partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; InterAction; The Research People; Cordaid; Interpeace; Croix-Rouge Française; CARE International; Tearfund; Caritas International Belgique"
-            },
-            {
-                name: "Tanganyika", lat: -6.067, lng: 28.975, staff: 42,
-                projets: [
-                    "Évaluation Finale : Projet de Réponse d’urgence aux besoins de santé.",
-                    "2. Evaluation Finale : Gender-Responsive Radio Education.",
-                    "3. Évaluation d'impact des projets Tearfund."
-                ],
-                partenaires: "Médecins du Monde France; Tearfund"
-            },
-            {
-                name: "Haut-Katanga", lat: -11.442, lng: 27.694, staff: 25,
-                projets: [
-                    "Évaluation indépendante du projet Laboratoire d’Accélération 8.7.",
-                    "2. Evaluation Finale : Gender-Responsive Radio Education."
-                ],
-                partenaires: "Parkinson's Progression Markers Initiative"
-            },
-            {
-                name: "Ituri", lat: 1.684, lng: 29.586, staff: 36,
-                projets: [
-                    "1. Outcome Harvesting - dialogues communautaires.",
-                    "2. Enquête annuelle du programme P-DEC.",
-                    "3. Enquête de perception - Renforcer la redevabilité.",
-                    "4. Leadership Local dans la réponse humanitaire.",
-                    "5. Etude de Base projet MISEREOR II.",
-                    "6. Évaluation multisectorielle de besoins.",
-                    "7. Évaluation d'impact des projets Tearfund."
-                ],
-                partenaires: "Ground Truth Solutions; InterAction; CARE International; Trocaire; Tearfund"
-            },
-            {
-                name: "Maniema", lat: -4.183, lng: 26.167, staff: 14,
-                projets: [
-                    "1. Evaluation mi-parcours Programme d’Agriculture durable.",
-                    "2. Evaluation finale Emergency multi-sectoral response.",
-                    "3. Etude de base du projet REDD+.",
-                    "4. Évaluation d'impact des projets Tearfund."
-                ],
-                partenaires: "Norwegian Church Aid; ACTED; Tearfund"
-            },
-            {
-                name: "Kasai", lat: -5.947, lng: 22.413, staff: 14,
-                projets: [ "Evaluation Finale du projet PODCH." ],
-                partenaires: "Caritas International Belgique"
-            },
-            {
-                name: "Kasai-central", lat: -5.898, lng: 22.430, staff: 19,
-                projets: [ "Evaluation Finale du projet PODCH." ],
-                partenaires: "Caritas International Belgique"
-            },
-            {
-                name: "Kinshasa", lat: -4.322, lng: 15.317, staff: 30,
-                projets: [
-                    "Leadership Local dans la réponse humanitaire.",
-                    "2. Evaluation Finale : Gender-Responsive Radio Education."
-                ],
-                partenaires: "InterAction"
-            },
-            {
-                name: "Equateur", lat: -0.805, lng: 19.412, staff: 30,
-                projets: [ "Facilité Forestière pour les peuples autochtones (IPLC)." ],
-                partenaires: "Parkinson's Progression Markers Initiative; Rainforest Foundation Norway"
-            },
-            {
-                name: "Lualaba", lat: -9.667, lng: 25.500, staff: 10,
-                projets: [ "Évaluation indépendante du projet Laboratoire d’Accélération 8.7." ],
-                partenaires: "Parkinson's Progression Markers Initiative"
-            }
-        ];
+(function(){
 
-        // ---- Position fixe ----
-        const FIXED_CENTER = [-2.8, 23.8];
-        const FIXED_ZOOM = 6;
+  // =========================================================
+  // 1. DONNÉES — une carte = une province.
+  //    Remplace/complète ce tableau depuis ton fichier Excel.
+  // =========================================================
+  const provincesData = [
+    {
+      name: "Nord-Kivu", lat: -0.571, lng: 28.674, staff: 131,
+      projets: [
+        "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations affectées par les crises dans les contextes complexes de l'Est de la RDC.",
+        "2. Analyse du contexte des conflits et réalisation d'une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix ''Kizazi Cha Amani : Génération paix pour les grands lacs''.",
+        "3. Renforcer la réponse d'urgence dans l'est de la RDC grâce à l'engagement communautaire.",
+        "4. Evaluation finale du projet WASH dans les territoires de Nyiragongo et Goma.",
+        "5. USAID's Sustainable Water and Sanitation Systems. « SWASSA ».",
+        "5. Programme de Partenariat pour le Développement de l'Est du Congo de l'USAID (P-DEC), Tujenge.",
+        "6. Outcome Harvesting (Etude Moisson des effets) l'appréciation des relations entre les autorités judiciaires, frontalières et les populations locales, projet : \" Accès à la justice\"",
+        "7. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix mis en œuvre par le programme de Partenariat pour le Développement de l'Est du Congo de l'USAID (P-DEC), Tujenge.",
+        "8. Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en République démocratique du Congo ;",
+        "9. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC;",
+        "10. Third Party Monitoring commandité par Humanitarian Grand Challenge Canada auprès de Nuru, Al Tech and Sentinel Project ;",
+        "11. Evaluation finale du Projet : S-3G « Stabilisation, Genre et Garantie communautaire, Guichet Unique, Gestion de la chaîne d'approvisionnement des médicaments pour la santé sexuelle »",
+        "12. Évaluation Finale : « Projet G1106-VBG, dignité, résilience et prévention »",
+        "13. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)",
+        "14. Analyse de l'État du Système humanitaire de l'ALNAP Cinquième Édition à l'Est de la RD Congo",
+        "15. Enquête SCA, PDM, CAP du projet : Livelihood support to malnourished children and their families."
+      ],
+      partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; Rainforest Foundation Norway « RFN » ; InterAction; ACTED; The Research People; Cordaid; Tearfund; Lutheran World Federation « LWF »"
+    },
+    {
+      name: "Sud-Kivu", lat: -2.822, lng: 28.189, staff: 81,
+      projets: [
+        "1. Évaluation continue en temps réel des perceptions, priorités et expériences des populations affectées par les crises dans les contextes complexes de l'Est de la RDC.",
+        "2. Analyse du contexte des conflits et réalisation d'une cartographie des réseaux, plateformes et mécanismes formels et informels de jeunes engagés pour la paix ''Kizazi Cha Amani : Génération paix pour les grands lacs''.",
+        "3. Renforcer la réponse d'urgence dans l'est de la RDC grâce à l'engagement communautaire.",
+        "4. USAID's Sustainable Water and Sanitation Systems. « SWASSA ».",
+        "5. Outcome Harvesting (Etude Moisson des effets) l'appréciation des relations entre les autorités judiciaires, frontalières et les populations locales, projet : \"Accès à la justice\"",
+        "6. Programme d'Agriculture durable et meilleure protection des forêts tropicales en RD Congo « REDD+ NICFI »",
+        "7. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
+        "8. Evaluation finale du Projet: Emergency multi-sectoral response in food assistance, wash, shelter and CCCM to people affected by displacements, (EKU-BHA)",
+        "9. Third Party Monitoring commandité par Humanitarian Grand Challenge Canada auprès de Nuru, Al Tech and Sentinel Project",
+        "10. Evaluation finale du Projet : S-3G « Stabilisation, Genre et Garantie communautaire, Guichet Unique, Gestion de la chaîne d'approvisionnement des médicaments pour la santé sexuelle »",
+        "11. Evaluation finale du projet : Mchango Wetu Kwa Amani",
+        "12. Évaluation finale : « Projet Prévention et contrôle des maladies hydriques dans la zone de santé d'Uvira »",
+        "13. Évaluation Finale : « Projet G1106-VBG, dignité, résilience et prévention »",
+        "13. Évaluation multisectorielle de besoins et étude de Marché.",
+        "14. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet",
+        "15. Etude de base du projet d'agriculture durable et protection des forêts en RDC « REDD+ »",
+        "15. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)",
+        "16. Analyse de l'État du Système humanitaire de l'ALNAP Cinquième Édition à l'Est de la RD Congo",
+        "17. Suivi Post Intervention et Évaluation Finale du projet PRERAC « Projet de Réponse Rapide au Sud-Kivu »",
+        "18. Evaluation Rapide Multisectorielle et Suivi Post Intervention du projet KCRI \" Kivus Crisis Response for IDPs\""
+      ],
+      partenaires: "Ground Truth Solutions; International Alert; Norwegian Church Aid; Mercy Corps; InterAction; The Research People; Cordaid; Interpeace ; Croix-Rouge Française ; CARE International; Tearfund; Caritas International Belgique"
+    },
+    {
+      name: "Tanganyika", lat: -6.067, lng: 28.975, staff: 42,
+      projets: [
+        "1. Évaluation Finale : Projet de Réponse d'urgence aux besoins de santé des populations affectées par les conflits",
+        "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet",
+        "3. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+      ],
+      partenaires: "Médecins du Monde France; Tearfund"
+    },
+    {
+      name: "Haut-Katanga", lat: -11.442, lng: 27.694, staff: 25,
+      projets: [
+        "1. Évaluation indépendante du projet Laboratoire d'Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l'espace Katanga)",
+        "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet"
+      ],
+      partenaires: "Parkinson's Progression Markers Initiative « PPMI »"
+    },
+    {
+      name: "Ituri", lat: 1.684, lng: 29.586, staff: 36,
+      projets: [
+        "1. Outcome Harvesting (Etude Moisson des effets) des dialogues communautaires pour la paix mis en œuvre par le programme de Partenariat pour le Développement de l'Est du Congo de l'USAID (P-DEC), Tujenge.",
+        "2. Enquête annuelle du programme de Partenariat pour le Développement de l'Est du Congo de l'USAID (P-DEC), Tujenge.",
+        "3. Enquête de perception sur le projet : « Renforcer la redevabilité envers les populations affectées »",
+        "4. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
+        "5. Etude de Base projet MISEREOR II",
+        "6. Évaluation multisectorielle de besoins et étude de Marché",
+        "7. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+      ],
+      partenaires: "Ground Truth Solutions « GTS » ; InterAction; CARE International; Trocaire ; Tearfund"
+    },
+    {
+      name: "Maniema", lat: -4.183, lng: 26.167, staff: 14,
+      projets: [
+        "1. Evaluation mi-parcours Programme d'Agriculture durable et meilleure protection des forêts tropicales en RD Congo « REDD+ NICFI »",
+        "2. Evaluation finale du Projet: Emergency multi-sectoral response in food assistance, wash, shelter and CCCM to people affected by displacements, (EKU-BHA)",
+        "3. Etude de base du projet d'agriculture durable et protection des forêts en RDC « REDD+ »",
+        "4. Évaluation d'impact des projets mise en œuvre par Tearfund (OFDA1, OFDA2, SWIFT1, SWIFT2, UNICEF,et MAVUNO)"
+      ],
+      partenaires: "Norwegian Church Aid « NCA » ; ACTED; Tearfund"
+    },
+    {
+      name: "Kasaï", lat: -5.947, lng: 22.413, staff: 14,
+      projets: [
+        "1. Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »"
+      ],
+      partenaires: "Caritas International Belgique"
+    },
+    {
+      name: "Kasaï-Central", lat: -5.898, lng: 22.430, staff: 19,
+      projets: [
+        "1. Evaluation Finale du projet PODCH « Promotion des Outils Digitaux dans la Coordination Humanitaire dans la région des Kasaï »"
+      ],
+      partenaires: "Caritas International Belgique"
+    },
+    {
+      name: "Kinshasa", lat: -4.322, lng: 15.317, staff: 30,
+      projets: [
+        "1. Leadership Local dans la réponse humanitaire dans le secteur des Abris et Établissement en RDC",
+        "2. Evaluation Finale du Projet : Gender-Responsive Radio Education « IRI » in the DRC and COVID-19 projet"
+      ],
+      partenaires: "InterAction"
+    },
+    {
+      name: "Équateur", lat: -0.805, lng: 19.412, staff: 30,
+      projets: [
+        "1. Facilité Forestière pour les peuples autochtones et les communautés locales (IPLC) en République démocratique du Congo"
+      ],
+      partenaires: "Parkinson's Progression Markers Initiative « PPMI »; Rainforest Foundation Norway « RFN »"
+    },
+    {
+      name: "Lualaba", lat: -9.667, lng: 25.500, staff: 10,
+      projets: [
+        "1. Évaluation indépendante du projet Laboratoire d'Accélération 8.7 (éradiquer les pires formes de travail des enfants dans le secteur minier dans l'espace Katanga)"
+      ],
+      partenaires: "Parkinson's Progression Markers Initiative « PPMI »"
+    }
+  ];
 
-        // ---- Initialisation de la carte avec zoom bloqué ----
-        const map = L.map('map', {
-            center: FIXED_CENTER,
-            zoom: FIXED_ZOOM,
-            zoomControl: false,
-            scrollWheelZoom: false,
-            doubleClickZoom: false,
-            touchZoom: false,
-            boxZoom: false,
-            dragging: false,
-            keyboard: false,
-            zoomSnap: false,
-            zoomDelta: false,
-            trackResize: false
-        });
+  // =========================================================
+  // 2. ÉCHELLE STAFF — source unique pour cercles + légende
+  // =========================================================
+  const STAFF_BINS = [
+    { min: 100, max: Infinity, label: "100+",   radius: 26, color: "#b8501f" },
+    { min: 50,  max: 99,       label: "51–100",  radius: 20, color: "#e0791f" },
+    { min: 25,  max: 49,       label: "26–50",   radius: 15, color: "#f0a34a" },
+    { min: 10,  max: 24,       label: "10–25",   radius: 11, color: "#f6c98a" }
+  ];
+  function binFor(staff){
+    return STAFF_BINS.find(b => staff >= b.min && staff <= b.max) || STAFF_BINS[STAFF_BINS.length - 1];
+  }
 
-        // ---- Fond de carte en niveaux de gris ----
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB',
-            subdomains: 'abcd',
-            maxZoom: 19,
-        }).addTo(map);
+  // =========================================================
+  // 3. CARTE
+  // =========================================================
+  const map = L.map('map', {
+    center: [-2.9, 23.5],
+    zoom: 6,
+    zoomControl: false,
+    attributionControl: true
+  });
+  L.control.zoom({ position: 'topright' }).addTo(map);
 
-        document.getElementById('map').classList.add('grayscale-map');
-        const style = document.createElement('style');
-        style.textContent = `
-            .grayscale-map .leaflet-tile {
-                filter: grayscale(95%) brightness(1.05) contrast(0.95);
-                -webkit-filter: grayscale(95%) brightness(1.05) contrast(0.95);
-            }
-            .grayscale-map .leaflet-tile-pane {
-                opacity: 0.95;
-            }
-            .leaflet-container {
-                cursor: default !important;
-            }
-            .leaflet-dragging .leaflet-grab {
-                cursor: default !important;
-            }
-        `;
-        document.head.appendChild(style);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
 
-        // ---- Fonction pour réinitialiser la vue (sans boucle infinie) ----
-        let isResetting = false;
-        function resetView() {
-            if (isResetting) return;
-            isResetting = true;
-            
-            const currentCenter = map.getCenter();
-            const currentZoom = map.getZoom();
-            
-            if (currentCenter.lat !== FIXED_CENTER[0] || 
-                currentCenter.lng !== FIXED_CENTER[1] || 
-                currentZoom !== FIXED_ZOOM) {
-                map.setView(FIXED_CENTER, FIXED_ZOOM, { animate: false });
-            }
-            
-            setTimeout(() => {
-                isResetting = false;
-            }, 100);
-        }
+  const DEFAULT_VIEW = { center: [-2.9, 23.5], zoom: 6 };
 
-        // ---- Fonction pour le rayon des cercles ----
-        function getRadius(staff) {
-            if (staff >= 80) return 42;
-            if (staff >= 40) return 30;
-            if (staff >= 20) return 22;
-            if (staff >= 10) return 16;
-            return 14;
-        }
+  function buildPopup(prov){
+    const bin = binFor(prov.staff);
+    return `
+      <div class="popup-title">📍 ${prov.name}</div>
+      <span class="popup-staff-badge">👥 ${prov.staff} staff</span>
+      <div class="popup-section">
+        <strong>Projets (${prov.projets.length})</strong>
+        ${prov.projets.map(p => `<div class="popup-projet">${p}</div>`).join('')}
+      </div>
+      <div class="popup-section">
+        <strong>Partenaires</strong>
+        <div>${prov.partenaires.split(';').map(p => `<span class="popup-partner">${p.trim()}</span>`).join('')}</div>
+      </div>
+    `;
+  }
 
-        // ---- Ajout des cercles ----
-        provinces.forEach(prov => {
-            const radius = getRadius(prov.staff);
-            const circle = L.circle([prov.lat, prov.lng], {
-                radius: radius * 1400,
-                color: '#6ec1e4',
-                weight: 2.5,
-                fillColor: '#6ec1e4',
-                fillOpacity: 0.65,
-                opacity: 0.9,
-                className: 'province-circle',
-                interactive: true,
-                bubblingMouseEvents: false
-            }).addTo(map);
+  // marqueurs indexés par nom pour la synchro liste <-> carte
+  const markers = {};
 
-            // Contenu du popup
-            const popupContent = `
-                <div class="popup-province">${prov.name}</div>
-                <div class="popup-staff">Staff : ${prov.staff}</div>
-                <span class="popup-label">Projets</span>
-                ${prov.projets.map(p => `<div class="popup-projet">${p}</div>`).join('')}
-                <span class="popup-label" style="margin-top:10px;">Partenaires</span>
-                <div class="popup-partners-container">
-                    ${prov.partenaires.split(';').map(p => `<span class="popup-partner">${p.trim()}</span>`).join(' ')}
-                </div>
-            `;
+  provincesData.forEach(prov => {
+    const bin = binFor(prov.staff);
+    const marker = L.circleMarker([prov.lat, prov.lng], {
+      radius: bin.radius,
+      color: '#ffffff',
+      weight: 1.5,
+      fillColor: bin.color,
+      fillOpacity: 0.82,
+      opacity: 0.9
+    }).addTo(map);
 
-            // Popup - on laisse Leaflet gérer la position automatiquement
-            circle.bindPopup(popupContent, {
-                className: 'popup-custom',
-                maxWidth: 360,
-                minWidth: 240,
-                closeButton: true,
-                autoPan: false,
-                keepInView: false,
-                autoClose: true,
-                closeOnClick: true
-            });
+    marker.bindPopup(buildPopup(prov), { className: 'custom-popup', maxWidth: 340, closeButton: true });
 
-            // Gérer l'ouverture du popup
-            circle.on('popupopen', function() {
-                setTimeout(resetView, 50);
-            });
+    marker.on('mouseover', function(){ this.setStyle({ weight: 3, color: '#f2c14e' }); });
+    marker.on('mouseout',  function(){ this.setStyle({ weight: 1.5, color: '#ffffff' }); });
 
-            // Gérer la fermeture du popup
-            circle.on('popupclose', function() {
-                setTimeout(resetView, 50);
-            });
+    markers[prov.name] = marker;
+  });
 
-            // Effet survol
-            circle.on('mouseover', function() {
-                this.setStyle({ weight: 4, color: '#C084FC', fillOpacity: 0.8 });
-            });
-            circle.on('mouseout', function() {
-                this.setStyle({ weight: 2.5, color: '#6ec1e4', fillOpacity: 0.65 });
-            });
-        });
+  // =========================================================
+  // 4. STATISTIQUES D'EN-TÊTE (calculées, jamais tapées à la main)
+  // =========================================================
+  const totalStaff    = provincesData.reduce((s, p) => s + p.staff, 0);
+  const totalProjects = provincesData.reduce((s, p) => s + p.projets.length, 0);
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><b>${provincesData.length}</b><span>Provinces</span></div>
+    <div class="stat"><b>${totalStaff}</b><span>Staff</span></div>
+    <div class="stat"><b>${totalProjects}</b><span>Projets</span></div>
+  `;
 
-        // ---- SURVEILLANCE de la position (sans boucle) ----
-        map.on('moveend', function() {
-            resetView();
-        });
+  // =========================================================
+  // 5. LÉGENDE / FILTRE
+  // =========================================================
+  let activeBin = null;
+  const legendEl = document.getElementById('legendChips');
+  legendEl.innerHTML = STAFF_BINS.map((b, i) => `
+    <div class="chip" data-bin="${i}">
+      <span class="dot" style="background:${b.color}"></span>${b.label}
+    </div>
+  `).join('');
 
-        // Réinitialisation périodique (moins agressive)
-        setInterval(resetView, 3000);
+  legendEl.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const idx = chip.getAttribute('data-bin');
+      activeBin = (activeBin === idx) ? null : idx;
+      legendEl.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.getAttribute('data-bin') === activeBin));
+      applyFilters();
+    });
+  });
 
-        // Désactiver le zoom clavier
-        document.addEventListener('keydown', function(e) {
-            if (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0') {
-                e.preventDefault();
-            }
-        });
+  // =========================================================
+  // 6. LISTE LATÉRALE + RECHERCHE
+  // =========================================================
+  const listEl = document.getElementById('provinceList');
+  const searchInput = document.getElementById('searchInput');
+  const listCount = document.getElementById('listCount');
 
-        // Ajustement initial
-        setTimeout(() => {
-            resetView();
-            map.invalidateSize();
-        }, 300);
+  function renderList(){
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
 
-        console.log('Carte chargée - Zoom verrouillé');
-    })();
+    listEl.innerHTML = provincesData.map(prov => {
+      const bin = binFor(prov.staff);
+      const matchesSearch = prov.name.toLowerCase().includes(query);
+      const matchesBin = activeBin === null || STAFF_BINS[activeBin] === bin;
+      const visible = matchesSearch && matchesBin;
+      if (visible) visibleCount++;
+
+      return `
+        <li class="province-card ${visible ? '' : 'dimmed'}" data-name="${prov.name}" style="${visible ? '' : 'display:none;'}">
+          <div class="pc-top">
+            <div class="pc-name"><span class="dot" style="background:${bin.color}"></span>${prov.name}</div>
+            <div class="pc-staff">${prov.staff}</div>
+          </div>
+          <div class="pc-meta">${prov.projets.length} projet(s) · ${prov.partenaires.split(';').length} partenaire(s)</div>
+        </li>
+      `;
+    }).join('');
+
+    listCount.textContent = `${visibleCount}/${provincesData.length}`;
+
+    if (visibleCount === 0){
+      listEl.innerHTML = `<div class="empty-state">Aucune province ne correspond à votre recherche.</div>`;
+    }
+
+    listEl.querySelectorAll('.province-card').forEach(card => {
+      card.addEventListener('click', () => focusProvince(card.getAttribute('data-name')));
+    });
+  }
+
+  function applyFilters(){
+    renderList();
+    provincesData.forEach(prov => {
+      const bin = binFor(prov.staff);
+      const dim = activeBin !== null && STAFF_BINS[activeBin] !== bin;
+      markers[prov.name].setStyle({ fillOpacity: dim ? 0.12 : 0.82, opacity: dim ? 0.25 : 0.9 });
+    });
+  }
+
+  function focusProvince(name){
+    const prov = provincesData.find(p => p.name === name);
+    if (!prov) return;
+    map.flyTo([prov.lat, prov.lng], 7.4, { duration: 0.7 });
+    setTimeout(() => markers[name].openPopup(), 650);
+    if (window.innerWidth <= 760) sidebar.classList.remove('open');
+  }
+
+  searchInput.addEventListener('input', renderList);
+  renderList();
+
+  // =========================================================
+  // 7. CONTRÔLES : reset vue + menu mobile
+  // =========================================================
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    map.closePopup();
+    activeBin = null;
+    legendEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    applyFilters();
+    map.flyTo(DEFAULT_VIEW.center, DEFAULT_VIEW.zoom, { duration: 0.7 });
+  });
+
+  const sidebar = document.getElementById('sidebar');
+  document.getElementById('menuBtn').addEventListener('click', () => sidebar.classList.toggle('open'));
+
+  setTimeout(() => map.invalidateSize(), 150);
+
+})();
 </script>
 </body>
 </html>
