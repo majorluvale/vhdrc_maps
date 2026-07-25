@@ -1,65 +1,59 @@
-# Carte interactive — Présence terrain RD Congo
+# Carte RDC — Répartition du personnel par province (style OCHA)
 
-Carte Leaflet en un seul fichier (`index.html`), prête à héberger sur GitHub Pages et à intégrer en `<iframe>`.
+Un seul fichier `index.html`, prêt pour GitHub Pages et l'intégration en `<iframe>`.
+
+## Ce que c'est
+
+- Une vraie carte choroplèthe : les **26 provinces de la RDC sont coloriées** selon leur
+  nombre de staff (dégradé bleu clair → bleu foncé). Les provinces sans intervention
+  restent en gris clair.
+- **Clic sur une province** → popup avec la liste des projets et des partenaires (ou un
+  message "Aucune intervention" si la province n'a pas de données).
+- Pas de tableau de bord, pas de barre latérale, pas de recherche : juste la carte, une
+  légende et un bandeau de titre, dans un style cartographique institutionnel (fond clair,
+  Arial, légende encadrée, échelle, flèche du nord) — inspiré des cartes OCHA.
+- Les limites administratives des provinces sont incluses directement dans le fichier
+  (source : geoBoundaries / découpage territorial RDC à 26 provinces), donc aucune
+  dépendance externe à charger à part les tuiles de fond de carte et Leaflet.
 
 ## Mettre en ligne (GitHub Pages)
 
-1. Crée un nouveau dépôt public sur GitHub (ex. `carte-rdc`).
-2. Ajoute le fichier `index.html` à la racine du dépôt (commit + push).
-3. Dans le dépôt : **Settings → Pages → Source** → choisis la branche `main` et le dossier `/ (root)` → **Save**.
-4. Après 1–2 minutes, ta carte est en ligne à l'adresse :
-   `https://TON-NOM-UTILISATEUR.github.io/carte-rdc/`
+1. Crée un dépôt public sur GitHub (ex. `carte-rdc`).
+2. Ajoute `index.html` à la racine (commit + push).
+3. **Settings → Pages → Source** → branche `main`, dossier `/ (root)` → **Save**.
+4. Ta carte est en ligne à `https://TON-NOM-UTILISATEUR.github.io/carte-rdc/`.
 
 ## Intégrer sur ton site (iframe)
 
 ```html
 <iframe
   src="https://TON-NOM-UTILISATEUR.github.io/carte-rdc/"
-  style="width:100%; height:700px; border:0; border-radius:16px; overflow:hidden;"
+  style="width:100%; height:700px; border:0;"
   loading="lazy"
-  title="Carte interactive - Présence terrain RD Congo">
+  title="Carte RDC - Répartition du personnel par province">
 </iframe>
 ```
 
-Ajuste `height` selon l'espace disponible sur la page (600–800px fonctionne bien sur desktop ; sur mobile la carte s'adapte automatiquement en hauteur réduite).
-
 ## Mettre à jour les données
 
-Toutes les données (provinces, coordonnées, staff, projets, partenaires) sont dans le tableau
-`provincesData` en haut du `<script>` dans `index.html`. Pour ajouter/modifier une province,
-copie ce modèle et ajuste :
+Tout se trouve dans l'objet `provincesData` au milieu du `<script>` de `index.html` :
 
 ```js
-{
-  name: "Nom-Province",
-  lat: 0.000, lng: 0.000,      // coordonnées GPS du centre de la province
-  staff: 25,                    // nombre total de staff
-  projets: [
-    "1. Intitulé du projet…",
-    "2. Intitulé du projet…"
-  ],
-  partenaires: "Partenaire A; Partenaire B; Partenaire C"  // séparés par ;
+"Nom-Province": {
+  staff: 25,
+  projets: ["1. …", "2. …"],
+  partenaires: "Partenaire A; Partenaire B"
 }
 ```
 
-Pas besoin de toucher au reste du code : les totaux d'en-tête, la légende, les couleurs des
-bulles et la liste latérale se recalculent automatiquement à partir de ce tableau.
-
-## Ce qui a été corrigé par rapport à la première version
-
-- **Taille des bulles fiable au zoom** : remplacement de `L.circle` (rayon en mètres, donc
-  instable selon le niveau de zoom) par `L.circleMarker` (rayon fixe en pixels).
-- **Fond de carte adapté à un usage public/iframe** : tuiles CARTO au lieu d'appeler directement
-  les serveurs OpenStreetMap (évite un blocage d'IP en cas de trafic).
-- **Navigation par liste** en plus des bulles sur la carte, avec recherche — utile pour les
-  petites provinces (ex. Lualaba, 10 staff) difficiles à cliquer sur mobile.
-- **Légende reliée aux données réelles** et cliquable pour filtrer les provinces par tranche de staff.
-- **Totaux automatiques** (nombre de provinces, staff total, nombre de projets) calculés depuis
-  les données, donc toujours justes même après modification.
-- **Version mobile** : la liste devient un tiroir accessible via le bouton ☰.
+Le nom de clé doit correspondre au nom de la province tel qu'utilisé dans le fond de carte
+(sans accent pour "Kasai" et "Equateur" — c'est déjà géré). Ajouter une province au tableau
+suffit : sa couleur, sa légende et les totaux du pied de page se recalculent automatiquement.
 
 ## Notes
 
-- Deux numéros de projets apparaissent en double dans les données sources pour le Nord-Kivu et
-  le Sud-Kivu (ex. deux entrées "5." et deux "13."/"15."). Je les ai conservés tels quels — à
-  corriger dans le fichier source si ce sont de vraies erreurs de numérotation.
+- Deux numéros de projets sont en double dans les données du Nord-Kivu et du Sud-Kivu
+  (ex. deux "5.", deux "13."/"15."). Conservés tels quels — à corriger dans la source si ce
+  sont de vraies erreurs.
+- Les frontières administratives sont simplifiées pour garder un fichier léger (~85 Ko) ;
+  suffisant pour un usage web à l'échelle du pays, pas pour de l'analyse géospatiale fine.
